@@ -11,21 +11,21 @@ namespace Better.UIProcessor.Runtime.Modules
     public class ModulesContainer<TElement> : Locator<Module<TElement>>
         where TElement : IElement
     {
-        public Task OnEnqueuedTransition(UIProcessor<TElement> processor, TransitionInfo transitionInfo)
+        public Task OnEnqueuedTransition(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
         {
             return GetElements()
                 .Select(m => m.OnEnqueuedTransition(processor, transitionInfo))
                 .WhenAll();
         }
 
-        public Task OnTransitionStarted(UIProcessor<TElement> processor, TElement fromElement, TransitionInfo transitionInfo)
+        public Task OnTransitionStarted(UIProcessor<TElement> processor, TElement fromElement, TransitionInfo<TElement> transitionInfo)
         {
             return GetElements()
                 .Select(m => m.OnTransitionStarted(processor, fromElement, transitionInfo))
                 .WhenAll();
         }
 
-        public async Task<ProcessResult<TElement>> TryGetTransitionElement(UIProcessor<TElement> processor, TransitionInfo transitionInfo)
+        public async Task<ProcessResult<TElement>> TryGetTransitionElement(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
         {
             var modules = GetElements();
             foreach (var module in modules)
@@ -40,7 +40,7 @@ namespace Better.UIProcessor.Runtime.Modules
             return ProcessResult<TElement>.Unsuccessful;
         }
 
-        public async Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo transitionInfo)
+        public async Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
         {
             var modules = GetElements();
             foreach (var module in modules)
@@ -55,28 +55,28 @@ namespace Better.UIProcessor.Runtime.Modules
             return ProcessResult<Sequence>.Unsuccessful;
         }
 
-        public Task OnPreSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo transitionInfo)
+        public Task OnPreSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
         {
             return GetElements()
                 .Select(m => m.OnPreSequencePlay(processor, fromElement, toElement, transitionInfo))
                 .WhenAll();
         }
 
-        public Task OnPostSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo transitionInfo)
+        public Task OnPostSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
         {
             return GetElements()
                 .Select(m => m.OnPostSequencePlay(processor, fromElement, toElement, transitionInfo))
                 .WhenAll();
         }
 
-        public Task OnTransitionCompleted(UIProcessor<TElement> processor, TElement openedElement, TransitionInfo transitionInfo)
+        public Task OnTransitionCompleted(UIProcessor<TElement> processor, TElement openedElement, TransitionInfo<TElement> transitionInfo)
         {
             return GetElements()
                 .Select(m => m.OnTransitionCompleted(processor, openedElement, transitionInfo))
                 .WhenAll();
         }
 
-        public Task OnTransitionCanceled(UIProcessor<TElement> processor, TransitionInfo transitionInfo)
+        public Task OnTransitionCanceled(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
         {
             return GetElements()
                 .Select(m => m.OnTransitionCanceled(processor, transitionInfo))
@@ -105,7 +105,7 @@ namespace Better.UIProcessor.Runtime.Modules
                 .WhenAll();
         }
 
-        public Task OnDequeuedTransition(UIProcessor<TElement> processor, TransitionInfo transitionInfo)
+        public Task OnDequeuedTransition(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
         {
             return GetElements()
                 .Select(m => m.OnDequeuedTransition(processor, transitionInfo))

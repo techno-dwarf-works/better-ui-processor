@@ -42,7 +42,7 @@ namespace Better.UIProcessor.Runtime.Modules
 
     public abstract class SingleModule<TElement, TTransitionInfo> : Module<TElement, TTransitionInfo>
         where TElement : IElement
-        where TTransitionInfo : TransitionInfo
+        where TTransitionInfo : TransitionInfo<TElement>
     {
         protected UIProcessor<TElement> Processor { get; private set; }
 

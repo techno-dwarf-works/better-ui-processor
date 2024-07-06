@@ -20,7 +20,7 @@ namespace Better.UIProcessor.Runtime
 
         private ModulesContainer<TElement> _modules;
         private ImplementationOverridable<Sequence> _defaultSequence;
-        private Queue<TransitionInfo> _transitionsQueue;
+        private Queue<TransitionInfo<TElement>> _transitionsQueue;
 
         public bool Initialized { get; private set; }
         public RectTransform Container { get; private set; }
@@ -114,7 +114,7 @@ namespace Better.UIProcessor.Runtime
             return module.Unlink(this);
         }
 
-        internal async Task<TElement> RunTransitionAsync(TransitionInfo transitionInfo)
+        internal async Task<TElement> RunTransitionAsync(TransitionInfo<TElement> transitionInfo)
         {
             TryInitialize();
 
@@ -150,7 +150,7 @@ namespace Better.UIProcessor.Runtime
             return OpenedElement;
         }
 
-        private async Task<ProcessResult<TElement>> ProcessTransitionAsync(TElement fromElement, TransitionInfo transitionInfo)
+        private async Task<ProcessResult<TElement>> ProcessTransitionAsync(TElement fromElement, TransitionInfo<TElement> transitionInfo)
         {
             if (transitionInfo.IsCancellationRequested)
             {
@@ -180,7 +180,7 @@ namespace Better.UIProcessor.Runtime
         }
 
 
-        private async Task<ProcessResult<TElement>> ProcessSequenceAsync(TElement fromElement, TElement toElement, TransitionInfo transitionInfo)
+        private async Task<ProcessResult<TElement>> ProcessSequenceAsync(TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
         {
             if (transitionInfo.IsCancellationRequested)
             {
@@ -202,11 +202,11 @@ namespace Better.UIProcessor.Runtime
             return new ProcessResult<TElement>(toElement);
         }
 
-        private async Task AwaitTransitionQueue(TransitionInfo transitionInfo)
+        private async Task AwaitTransitionQueue(TransitionInfo<TElement> transitionInfo)
         {
             if (_transitionsQueue.IsNullOrEmpty())
             {
-                var message = $"{nameof(_transitionsQueue)} cannot be null or emty";
+                var message = $"{nameof(_transitionsQueue)} cannot be null or empty";
                 DebugUtility.LogException<InvalidOperationException>(message);
                 return;
             }
@@ -214,7 +214,7 @@ namespace Better.UIProcessor.Runtime
             await TaskUtility.WaitUntil(() => _transitionsQueue.Peek().Equals(transitionInfo));
         }
 
-        private async Task<ProcessResult<TElement>> TryGetTransitionElement(TransitionInfo transitionInfo)
+        private async Task<ProcessResult<TElement>> TryGetTransitionElement(TransitionInfo<TElement> transitionInfo)
         {
             if (transitionInfo.IsCancellationRequested)
             {

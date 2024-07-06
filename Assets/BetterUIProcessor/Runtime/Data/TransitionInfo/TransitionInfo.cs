@@ -4,12 +4,15 @@ using System.Text;
 using System.Threading;
 using Better.Commons.Runtime.Extensions;
 using Better.Commons.Runtime.Utility;
+using Better.UIProcessor.Runtime.Interfaces;
 using Better.UIProcessor.Runtime.Sequences;
 
 namespace Better.UIProcessor.Runtime.Data
 {
-    public abstract class TransitionInfo
+    public abstract class TransitionInfo<TElement>
+        where TElement : IElement
     {
+        private HashSet<UIProcessor<TElement>> _processors;
         private CancellationTokenSource _cancellationTokenSource;
 
         public Type SequenceType { get; private set; }
@@ -19,12 +22,33 @@ namespace Better.UIProcessor.Runtime.Data
         public int LockCount { get; private set; }
         public bool Mutable => LockCount <= 0;
 
-        protected TransitionInfo(CancellationToken cancellationToken)
+        protected TransitionInfo(CancellationToken cancellationToken = default)
         {
+            _processors = new();
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         }
 
-        public TransitionInfo OverrideSequence<TSequence>()
+        public TransitionInfo<TElement> AddProcessor(UIProcessor<TElement> processor)
+        {
+            if (ValidateMutable(true))
+            {
+                _processors.Add(processor);
+            }
+
+            return this;
+        }
+
+        public TransitionInfo<TElement> RemoveProcessor(UIProcessor<TElement> processor)
+        {
+            if (ValidateMutable(true))
+            {
+                _processors.Remove(processor);
+            }
+
+            return this;
+        }
+
+        public TransitionInfo<TElement> OverrideSequence<TSequence>()
             where TSequence : Sequence
         {
             if (ValidateMutable(true))
@@ -36,13 +60,13 @@ namespace Better.UIProcessor.Runtime.Data
             return this;
         }
 
-        internal TransitionInfo TakeLock()
+        internal TransitionInfo<TElement> TakeLock()
         {
             LockCount++;
             return this;
         }
 
-        internal TransitionInfo ReleaseLock()
+        internal TransitionInfo<TElement> ReleaseLock()
         {
             LockCount--;
             LockCount = Math.Max(LockCount, 0);
@@ -50,7 +74,7 @@ namespace Better.UIProcessor.Runtime.Data
             return this;
         }
 
-        public virtual TransitionInfo Cancel()
+        public virtual TransitionInfo<TElement> Cancel()
         {
             _cancellationTokenSource.Cancel();
             return this;
