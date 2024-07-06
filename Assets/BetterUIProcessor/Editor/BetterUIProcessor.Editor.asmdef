@@ -1,0 +1,23 @@
+{
+    "name": "BetterUIProcessor.Editor",
+    "rootNamespace": "Better.UIProcessor.EditorAddons",
+    "references": [
+        "GUID:01df13aca8d01e24a911bcc3e8277031",
+        "GUID:6adbd2a12d24f5d429f7ea1b1086e835",
+        "GUID:dfef1d697f628474abe4fd3ceed9db56",
+        "GUID:8bd4b41f8da90144d9006c4d926c9679",
+        "GUID:55fbe2a01ca11514f94a66e7102c8895",
+        "GUID:ecdd0819e3429eb44b13a432679a1135"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
