@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.tdw.better.commons": {
-      "version": "0.0.12",
+      "version": "0.0.14",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -17,7 +17,7 @@
       "url": "https://package.openupm.com"
     },
     "com.tdw.better.locators": {
-      "version": "0.1.11",
+      "version": "0.1.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {

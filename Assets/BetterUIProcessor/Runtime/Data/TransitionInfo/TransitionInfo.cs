@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Better.Commons.Runtime.Extensions;
 using Better.Commons.Runtime.Utility;
 using Better.UIProcessor.Runtime.Interfaces;
@@ -12,40 +12,42 @@ namespace Better.UIProcessor.Runtime.Data
     public abstract class TransitionInfo<TElement>
         where TElement : IElement
     {
-        private HashSet<UIProcessor<TElement>> _processors;
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly UIProcessor<TElement> _processor;
+        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly TaskCompletionSource<TElement> _completionSource;
 
         public Type SequenceType { get; private set; }
         public bool OverridenSequence { get; private set; }
-        public bool IsCancellationRequested => _cancellationTokenSource.IsCancellationRequested;
+        public bool IsCanceled => _cancellationTokenSource.IsCancellationRequested;
         public CancellationToken CancellationToken => _cancellationTokenSource.Token;
-        public int LockCount { get; private set; }
-        public bool Mutable => LockCount <= 0;
+        public bool Used { get; private set; }
+        public bool Mutable => !Used;
 
-        protected TransitionInfo(CancellationToken cancellationToken = default)
+        protected TransitionInfo(UIProcessor<TElement> processor, CancellationToken cancellationToken = default)
         {
-            _processors = new();
+            _processor = processor;
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _completionSource = new(CancellationToken);
         }
 
-        public TransitionInfo<TElement> AddProcessor(UIProcessor<TElement> processor)
+        public TransitionInfo<TElement> Run()
         {
-            if (ValidateMutable(true))
-            {
-                _processors.Add(processor);
-            }
-
+            RunningAsync().Forget();
             return this;
         }
 
-        public TransitionInfo<TElement> RemoveProcessor(UIProcessor<TElement> processor)
+        protected virtual async Task RunningAsync()
         {
-            if (ValidateMutable(true))
-            {
-                _processors.Remove(processor);
-            }
+            if (Used) return;
+            Used = true;
 
-            return this;
+            var result = await _processor.RunTransitionAsync(this);
+            _completionSource.TrySetResult(result);
+        }
+
+        public Task<TElement> Await()
+        {
+            return _completionSource.Task;
         }
 
         public TransitionInfo<TElement> OverrideSequence<TSequence>()
@@ -56,20 +58,6 @@ namespace Better.UIProcessor.Runtime.Data
                 OverridenSequence = true;
                 SequenceType = typeof(TSequence);
             }
-
-            return this;
-        }
-
-        internal TransitionInfo<TElement> TakeLock()
-        {
-            LockCount++;
-            return this;
-        }
-
-        internal TransitionInfo<TElement> ReleaseLock()
-        {
-            LockCount--;
-            LockCount = Math.Max(LockCount, 0);
 
             return this;
         }
@@ -99,10 +87,10 @@ namespace Better.UIProcessor.Runtime.Data
                 .AppendFieldLine(nameof(SequenceType), SequenceType)
                 .AppendFieldLine(nameof(OverridenSequence), OverridenSequence)
                 .AppendLine()
-                .AppendFieldLine(nameof(LockCount), LockCount)
+                .AppendFieldLine(nameof(Used), Used)
                 .AppendFieldLine(nameof(Mutable), Mutable)
                 .AppendLine()
-                .AppendFieldLine(nameof(IsCancellationRequested), IsCancellationRequested)
+                .AppendFieldLine(nameof(IsCanceled), IsCanceled)
                 .AppendFieldLine(nameof(CancellationToken), CancellationToken);
         }
 

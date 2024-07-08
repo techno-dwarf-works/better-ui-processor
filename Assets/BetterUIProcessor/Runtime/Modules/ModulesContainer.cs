@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Better.Commons.Runtime.Extensions;
 using Better.Locators.Runtime;
@@ -8,6 +9,7 @@ using Better.UIProcessor.Runtime.Sequences;
 
 namespace Better.UIProcessor.Runtime.Modules
 {
+    [Serializable]
     public class ModulesContainer<TElement> : Locator<Module<TElement>>
         where TElement : IElement
     {

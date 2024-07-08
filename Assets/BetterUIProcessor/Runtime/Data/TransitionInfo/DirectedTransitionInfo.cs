@@ -9,11 +9,12 @@ namespace Better.UIProcessor.Runtime.Data
     {
         public Type ElementType { get; private set; }
 
-        public DirectedTransitionInfo(CancellationToken cancellationToken = default) : base(cancellationToken)
+        public DirectedTransitionInfo(UIProcessor<TElement> processor, CancellationToken cancellationToken = default)
+            : base(processor, cancellationToken)
         {
         }
 
-        public TransitionInfo<TElement> SetTargetElement<TValue>()
+        public DirectedTransitionInfo<TElement> SetTargetElement<TValue>()
             where TValue : TElement
         {
             if (ValidateMutable(true))

@@ -1,10 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Better.UIProcessor.Runtime.Data;
 using Better.UIProcessor.Runtime.Interfaces;
 using Better.UIProcessor.Runtime.Sequences;
 
 namespace Better.UIProcessor.Runtime.Modules
 {
+    [Serializable]
     public abstract class Module<TElement> where TElement : IElement
     {
         public int LinksCount { get; private set; }

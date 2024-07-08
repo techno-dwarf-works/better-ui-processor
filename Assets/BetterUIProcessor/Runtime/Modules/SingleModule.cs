@@ -1,9 +1,11 @@
-﻿using Better.UIProcessor.Runtime.Data;
+﻿using System;
+using Better.UIProcessor.Runtime.Data;
 using Better.UIProcessor.Runtime.Interfaces;
 using UnityEngine;
 
 namespace Better.UIProcessor.Runtime.Modules
 {
+    [Serializable]
     public abstract class SingleModule<TElement> : Module<TElement>
         where TElement : IElement
     {

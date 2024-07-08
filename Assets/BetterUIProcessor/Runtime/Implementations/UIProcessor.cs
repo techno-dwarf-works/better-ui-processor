@@ -13,21 +13,21 @@ using UnityEngine;
 
 namespace Better.UIProcessor.Runtime
 {
+    [Serializable]
     public class UIProcessor<TElement>
         where TElement : IElement
     {
-        // TODO: Create or error for Container (at Run/Init)
+        [SerializeField] private ModulesContainer<TElement> _modules;
+        [SerializeField] private ImplementationOverridable<Sequence> _defaultSequence;
+        [SerializeField] private RectTransform _container;
 
-        private ModulesContainer<TElement> _modules;
-        private ImplementationOverridable<Sequence> _defaultSequence;
         private Queue<TransitionInfo<TElement>> _transitionsQueue;
 
         public bool Initialized { get; private set; }
-        public RectTransform Container { get; private set; }
+        public RectTransform Container => _container;
         public TElement OpenedElement { get; private set; }
         public bool InTransition => _transitionsQueue is { Count: < 0 };
         private SettingsData Settings => UIProcessorSettings.Instance.Current;
-
         public Sequence DefaultSequence => _defaultSequence.Value;
 
         public UIProcessor()
@@ -38,6 +38,11 @@ namespace Better.UIProcessor.Runtime
         public void Initialize()
         {
             if (!ValidateInitialized(false))
+            {
+                return;
+            }
+
+            if (!ValidateContainer())
             {
                 return;
             }
@@ -61,13 +66,11 @@ namespace Better.UIProcessor.Runtime
 
         public UIProcessor<TElement> SetContainer(RectTransform value)
         {
-            if (value == null)
+            if (ValidateContainer(value))
             {
-                DebugUtility.LogException<ArgumentNullException>(nameof(value));
-                return this;
+                _container = value;
             }
 
-            Container = value;
             return this;
         }
 
@@ -117,10 +120,15 @@ namespace Better.UIProcessor.Runtime
         internal async Task<TElement> RunTransitionAsync(TransitionInfo<TElement> transitionInfo)
         {
             TryInitialize();
+            if (!ValidateInitialized(true))
+            {
+                transitionInfo.Cancel();
+                return default;
+            }
 
             if (_transitionsQueue.Contains(transitionInfo))
             {
-                var message = $"{nameof(transitionInfo)} already queued, unexpected operation";
+                var message = $"{nameof(transitionInfo)} already queued, unexpected internal operation";
                 throw new InvalidOperationException(message);
             }
 
@@ -137,13 +145,14 @@ namespace Better.UIProcessor.Runtime
             }
             else
             {
+                transitionInfo.Cancel();
                 await _modules.OnTransitionCanceled(this, transitionInfo);
             }
 
             if (!_transitionsQueue.Dequeue().Equals(transitionInfo))
             {
-                var message = $"Unexpected dequeue, {transitionInfo}";
-                throw new InvalidOperationException(message); // TODO: mb LogExc
+                var message = $"Unexpected internal dequeue, {transitionInfo}";
+                throw new InvalidOperationException(message);
             }
 
             await _modules.OnDequeuedTransition(this, transitionInfo);
@@ -152,7 +161,7 @@ namespace Better.UIProcessor.Runtime
 
         private async Task<ProcessResult<TElement>> ProcessTransitionAsync(TElement fromElement, TransitionInfo<TElement> transitionInfo)
         {
-            if (transitionInfo.IsCancellationRequested)
+            if (transitionInfo.IsCanceled)
             {
                 return ProcessResult<TElement>.Unsuccessful;
             }
@@ -182,7 +191,7 @@ namespace Better.UIProcessor.Runtime
 
         private async Task<ProcessResult<TElement>> ProcessSequenceAsync(TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
         {
-            if (transitionInfo.IsCancellationRequested)
+            if (transitionInfo.IsCanceled)
             {
                 return ProcessResult<TElement>.Unsuccessful;
             }
@@ -190,7 +199,7 @@ namespace Better.UIProcessor.Runtime
             var sequenceResult = await _modules.TryGetTransitionSequence(this, fromElement, toElement, transitionInfo);
             var sequence = sequenceResult.IsSuccessful ? sequenceResult.Data : DefaultSequence;
 
-            if (transitionInfo.IsCancellationRequested)
+            if (transitionInfo.IsCanceled)
             {
                 return ProcessResult<TElement>.Unsuccessful;
             }
@@ -216,13 +225,13 @@ namespace Better.UIProcessor.Runtime
 
         private async Task<ProcessResult<TElement>> TryGetTransitionElement(TransitionInfo<TElement> transitionInfo)
         {
-            if (transitionInfo.IsCancellationRequested)
+            if (transitionInfo.IsCanceled)
             {
                 return ProcessResult<TElement>.Unsuccessful;
             }
 
             var elementResult = await _modules.TryGetTransitionElement(this, transitionInfo);
-            if (transitionInfo.IsCancellationRequested)
+            if (transitionInfo.IsCanceled)
             {
                 if (elementResult.IsSuccessful)
                 {
@@ -257,6 +266,27 @@ namespace Better.UIProcessor.Runtime
             }
 
             return isValid;
+        }
+
+        private bool ValidateContainer(RectTransform container, bool logException = true)
+        {
+            if (container == null)
+            {
+                if (logException)
+                {
+                    var message = $"{nameof(container)} not valid, cannot be null";
+                    DebugUtility.LogException(message);
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateContainer(bool logException = true)
+        {
+            return ValidateContainer(Container, logException);
         }
     }
 

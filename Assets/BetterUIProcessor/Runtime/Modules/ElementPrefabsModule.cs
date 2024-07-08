@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Better.Locators.Runtime;
 using Better.UIProcessor.Runtime.Data;
 using Better.UIProcessor.Runtime.Interfaces;
 using UnityEngine;
@@ -12,9 +12,20 @@ namespace Better.UIProcessor.Runtime.Modules
     public class ElementPrefabsModule<TElement> : Module<TElement, DirectedTransitionInfo<TElement>>
         where TElement : Component, IElement
     {
-        // TODO: Add Serialization, handle corner use-cases
+        [SerializeField] private Locator<TElement> _prefabs;
 
-        [SerializeField] private List<TElement> _prefabs;
+        public ElementPrefabsModule()
+        {
+            _prefabs = new();
+        }
+
+        public ElementPrefabsModule(TElement[] prefabs) : this()
+        {
+            foreach (var prefab in prefabs)
+            {
+                _prefabs.Add(prefab);
+            }
+        }
 
         protected override async Task<ProcessResult<TElement>> TryGetTransitionElement(UIProcessor<TElement> processor, DirectedTransitionInfo<TElement> transitionInfo)
         {
@@ -34,28 +45,13 @@ namespace Better.UIProcessor.Runtime.Modules
 
         private bool TryCreateElement(RectTransform container, Type elementType, out TElement element)
         {
-            if (TryGetPrefab(elementType, out TElement prefab))
+            if (_prefabs.TryGet(elementType, out var prefab))
             {
                 element = Object.Instantiate(prefab, container);
                 return true;
             }
 
             element = default;
-            return false;
-        }
-
-        private bool TryGetPrefab(Type elementType, out TElement elementPrefab)
-        {
-            foreach (var prefab in _prefabs)
-            {
-                if (prefab.GetType() == elementType)
-                {
-                    elementPrefab = prefab;
-                    return true;
-                }
-            }
-
-            elementPrefab = default;
             return false;
         }
     }

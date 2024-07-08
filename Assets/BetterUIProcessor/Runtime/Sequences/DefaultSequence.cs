@@ -22,6 +22,8 @@ namespace Better.UIProcessor.Runtime.Sequences
 
             if (to != null)
             {
+                to.RectTransform.SetAsLastSibling();
+                
                 var prepareShowTask = to.PrepareShowAsync(CancellationToken.None);
                 preparedTasks.Add(prepareShowTask);
             }

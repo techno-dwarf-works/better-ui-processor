@@ -3,6 +3,6 @@
     public class UIProcessorExtensions
     {
         // Module operations with Generic
-        //         public bool RemoveModule(Type type)
+        //         public bool RemoveModule(Type type) +TryAdd +GetOrAdd
     }
 }
