@@ -9,16 +9,26 @@ using UnityEngine;
 namespace Better.UIProcessor.Runtime
 {
     [RequireComponent(typeof(ElementView))]
-    public abstract class Element<TModel, TView> : UIMonoBehaviour, IElement
-        where TModel : ElementModel
+    public abstract class Element<TView, TModel> : UIMonoBehaviour, IElement<TModel>
         where TView : ElementView
+        where TModel : ElementModel
     {
         [SerializeField] private TView _view;
 
         protected TModel Model { get; private set; }
         protected TView View => _view;
 
-        public virtual void SetModel(TModel model)
+        Task IElement.InitializeAsync(CancellationToken cancellationToken)
+        {
+            View.Interactable = false;
+            View.Displayed = false;
+
+            return OnInitializeAsync(cancellationToken);
+        }
+
+        protected abstract Task OnInitializeAsync(CancellationToken cancellationToken);
+
+        void IElement<TModel>.SetModel(TModel model)
         {
             if (model == null)
             {
@@ -32,21 +42,14 @@ namespace Better.UIProcessor.Runtime
 
         protected abstract void Rebuild();
 
-
-        Task IElement.InitializeAsync(CancellationToken cancellationToken)
-        {
-            View.Interactable = false;
-            View.Displayed = false;
-
-            return OnInitializeAsync(cancellationToken);
-        }
-
         #region ISequencable
 
         Task ISequencable.PrepareShowAsync(CancellationToken cancellationToken)
         {
             return OnPrepareShowAsync(cancellationToken);
         }
+
+        protected abstract Task OnPrepareShowAsync(CancellationToken cancellationToken);
 
         async Task ISequencable.ShowAsync(CancellationToken cancellationToken)
         {
@@ -60,11 +63,15 @@ namespace Better.UIProcessor.Runtime
             }
         }
 
+        protected abstract Task OnShowAsync(CancellationToken cancellationToken);
+
         Task ISequencable.PrepareHideAsync(CancellationToken cancellationToken)
         {
             View.Interactable = false;
             return OnPrepareHideAsync(cancellationToken);
         }
+
+        protected abstract Task OnPrepareHideAsync(CancellationToken cancellationToken);
 
         async Task ISequencable.HideAsync(CancellationToken cancellationToken)
         {
@@ -80,12 +87,8 @@ namespace Better.UIProcessor.Runtime
             }
         }
 
-        #endregion
-
-        protected abstract Task OnInitializeAsync(CancellationToken cancellationToken);
-        protected abstract Task OnPrepareShowAsync(CancellationToken cancellationToken);
-        protected abstract Task OnShowAsync(CancellationToken cancellationToken);
-        protected abstract Task OnPrepareHideAsync(CancellationToken cancellationToken);
         protected abstract Task OnHideAsync(CancellationToken cancellationToken);
+
+        #endregion
     }
 }

@@ -7,84 +7,83 @@ using Better.UIProcessor.Runtime.Sequences;
 namespace Better.UIProcessor.Runtime.Modules
 {
     [Serializable]
-    public abstract class Module<TElement> where TElement : IElement
+    public abstract class Module
     {
         public int LinksCount { get; private set; }
         public bool IsLinked => LinksCount > 0;
 
-        protected internal virtual bool Link(UIProcessor<TElement> processor)
+        protected internal virtual bool Link(UIProcessor processor)
         {
             LinksCount++;
             return true;
         }
 
-        protected internal virtual bool Unlink(UIProcessor<TElement> processor)
+        protected internal virtual bool Unlink(UIProcessor processor)
         {
             LinksCount--;
             return true;
         }
 
-        protected internal virtual Task OnEnqueuedTransition(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task OnEnqueuedTransition(UIProcessor processor, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task OnTransitionStarted(UIProcessor<TElement> processor, TElement fromElement, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task OnTransitionStarted(UIProcessor processor, IElement fromElement, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task<ProcessResult<TElement>> TryGetTransitionElement(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task<ProcessResult<IElement>> TryGetTransitionElement(UIProcessor processor, TransitionInfo transitionInfo)
         {
-            return Task.FromResult(ProcessResult<TElement>.Unsuccessful);
+            return Task.FromResult(ProcessResult<IElement>.Unsuccessful);
         }
 
-        protected internal virtual Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             return Task.FromResult(ProcessResult<Sequence>.Unsuccessful);
         }
 
-        protected internal virtual Task OnPreSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task OnPreSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task OnPostSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task OnPostSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task OnTransitionCompleted(UIProcessor<TElement> processor, TElement openedElement, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task OnTransitionCompleted(UIProcessor processor, IElement openedElement, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task OnTransitionCanceled(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task OnTransitionCanceled(UIProcessor processor, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task<bool> TryReleaseElement(UIProcessor<TElement> processor, TElement element)
+        protected internal virtual Task<bool> TryReleaseElement(UIProcessor processor, IElement element)
         {
             return Task.FromResult(false);
         }
 
-        protected internal virtual Task OnElementReleased(UIProcessor<TElement> processor)
+        protected internal virtual Task OnElementReleased(UIProcessor processor)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task OnDequeuedTransition(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal virtual Task OnDequeuedTransition(UIProcessor processor, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
     }
 
-    public abstract class Module<TElement, TTransitionInfo> : Module<TElement>
-        where TElement : IElement
-        where TTransitionInfo : TransitionInfo<TElement>
+    public abstract class Module<TTransitionInfo> : Module
+        where TTransitionInfo : TransitionInfo
     {
-        protected internal sealed override async Task OnEnqueuedTransition(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task OnEnqueuedTransition(UIProcessor processor, TransitionInfo transitionInfo)
         {
             await base.OnEnqueuedTransition(processor, transitionInfo);
 
@@ -94,12 +93,12 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected virtual Task OnEnqueuedTransition(UIProcessor<TElement> processor, TTransitionInfo transitionInfo)
+        protected virtual Task OnEnqueuedTransition(UIProcessor processor, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal sealed override async Task OnTransitionStarted(UIProcessor<TElement> processor, TElement fromElement, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task OnTransitionStarted(UIProcessor processor, IElement fromElement, TransitionInfo transitionInfo)
         {
             await base.OnTransitionStarted(processor, fromElement, transitionInfo);
 
@@ -109,12 +108,12 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected virtual Task OnTransitionStarted(UIProcessor<TElement> processor, TElement fromElement, TTransitionInfo transitionInfo)
+        protected virtual Task OnTransitionStarted(UIProcessor processor, IElement fromElement, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal sealed override async Task<ProcessResult<TElement>> TryGetTransitionElement(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task<ProcessResult<IElement>> TryGetTransitionElement(UIProcessor processor, TransitionInfo transitionInfo)
         {
             var result = await base.TryGetTransitionElement(processor, transitionInfo);
             if (!result.IsSuccessful && transitionInfo is TTransitionInfo castedTransitionInfo)
@@ -125,12 +124,12 @@ namespace Better.UIProcessor.Runtime.Modules
             return result;
         }
 
-        protected virtual Task<ProcessResult<TElement>> TryGetTransitionElement(UIProcessor<TElement> processor, TTransitionInfo transitionInfo)
+        protected virtual Task<ProcessResult<IElement>> TryGetTransitionElement(UIProcessor processor, TTransitionInfo transitionInfo)
         {
-            return Task.FromResult(ProcessResult<TElement>.Unsuccessful);
+            return Task.FromResult(ProcessResult<IElement>.Unsuccessful);
         }
 
-        protected internal sealed override async Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             var result = await base.TryGetTransitionSequence(processor, fromElement, toElement, transitionInfo);
             if (!result.IsSuccessful && transitionInfo is TTransitionInfo castedTransitionInfo)
@@ -141,12 +140,12 @@ namespace Better.UIProcessor.Runtime.Modules
             return result;
         }
 
-        protected virtual Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TTransitionInfo transitionInfo)
+        protected virtual Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor processor, IElement fromElement, IElement toElement, TTransitionInfo transitionInfo)
         {
             return Task.FromResult(ProcessResult<Sequence>.Unsuccessful);
         }
 
-        protected internal sealed override async Task OnPreSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task OnPreSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             await base.OnPreSequencePlay(processor, fromElement, toElement, transitionInfo);
 
@@ -156,12 +155,12 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected virtual Task OnPreSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TTransitionInfo transitionInfo)
+        protected virtual Task OnPreSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal sealed override async Task OnPostSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task OnPostSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             await base.OnPostSequencePlay(processor, fromElement, toElement, transitionInfo);
 
@@ -171,12 +170,12 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected virtual Task OnPostSequencePlay(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TTransitionInfo transitionInfo)
+        protected virtual Task OnPostSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal sealed override async Task OnTransitionCompleted(UIProcessor<TElement> processor, TElement openedElement, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task OnTransitionCompleted(UIProcessor processor, IElement openedElement, TransitionInfo transitionInfo)
         {
             await base.OnTransitionCompleted(processor, openedElement, transitionInfo);
 
@@ -186,12 +185,12 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected virtual Task OnTransitionCompleted(UIProcessor<TElement> processor, TElement openedElement, TTransitionInfo transitionInfo)
+        protected virtual Task OnTransitionCompleted(UIProcessor processor, IElement openedElement, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal sealed override async Task OnTransitionCanceled(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task OnTransitionCanceled(UIProcessor processor, TransitionInfo transitionInfo)
         {
             await base.OnTransitionCanceled(processor, transitionInfo);
 
@@ -201,12 +200,12 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected virtual Task OnTransitionCanceled(UIProcessor<TElement> processor, TTransitionInfo transitionInfo)
+        protected virtual Task OnTransitionCanceled(UIProcessor processor, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal sealed override async Task OnDequeuedTransition(UIProcessor<TElement> processor, TransitionInfo<TElement> transitionInfo)
+        protected internal sealed override async Task OnDequeuedTransition(UIProcessor processor, TransitionInfo transitionInfo)
         {
             await base.OnDequeuedTransition(processor, transitionInfo);
 
@@ -216,7 +215,7 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected virtual Task OnDequeuedTransition(UIProcessor<TElement> processor, TTransitionInfo transitionInfo)
+        protected virtual Task OnDequeuedTransition(UIProcessor processor, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }

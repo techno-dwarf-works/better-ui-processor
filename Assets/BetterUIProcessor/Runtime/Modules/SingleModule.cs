@@ -1,17 +1,15 @@
 ﻿using System;
 using Better.UIProcessor.Runtime.Data;
-using Better.UIProcessor.Runtime.Interfaces;
 using UnityEngine;
 
 namespace Better.UIProcessor.Runtime.Modules
 {
     [Serializable]
-    public abstract class SingleModule<TElement> : Module<TElement>
-        where TElement : IElement
+    public abstract class SingleModule : Module
     {
-        protected UIProcessor<TElement> Processor { get; private set; }
+        protected UIProcessor Processor { get; private set; }
 
-        protected internal override bool Link(UIProcessor<TElement> processor)
+        protected internal override bool Link(UIProcessor processor)
         {
             if (IsLinked)
             {
@@ -30,7 +28,7 @@ namespace Better.UIProcessor.Runtime.Modules
             return result;
         }
 
-        protected internal override bool Unlink(UIProcessor<TElement> processor)
+        protected internal override bool Unlink(UIProcessor processor)
         {
             var result = base.Unlink(processor);
             if (result && Processor == processor)
@@ -42,13 +40,12 @@ namespace Better.UIProcessor.Runtime.Modules
         }
     }
 
-    public abstract class SingleModule<TElement, TTransitionInfo> : Module<TElement, TTransitionInfo>
-        where TElement : IElement
-        where TTransitionInfo : TransitionInfo<TElement>
+    public abstract class SingleModule<TTransitionInfo> : Module<TTransitionInfo>
+        where TTransitionInfo : TransitionInfo
     {
-        protected UIProcessor<TElement> Processor { get; private set; }
+        protected UIProcessor Processor { get; private set; }
 
-        protected internal override bool Link(UIProcessor<TElement> processor)
+        protected internal override bool Link(UIProcessor processor)
         {
             if (IsLinked)
             {
@@ -67,7 +64,7 @@ namespace Better.UIProcessor.Runtime.Modules
             return result;
         }
 
-        protected internal override bool Unlink(UIProcessor<TElement> processor)
+        protected internal override bool Unlink(UIProcessor processor)
         {
             var result = base.Unlink(processor);
             if (result && Processor == processor)

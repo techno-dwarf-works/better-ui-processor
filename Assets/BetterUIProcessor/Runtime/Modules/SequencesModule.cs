@@ -9,8 +9,7 @@ using UnityEngine;
 namespace Better.UIProcessor.Runtime.Modules
 {
     [Serializable]
-    public class SequencesModule<TElement> : Module<TElement>
-        where TElement : IElement
+    public class SequencesModule : Module
     {
         [SerializeField] private Locator<Sequence> _sequences;
 
@@ -27,7 +26,7 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected internal override async Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor<TElement> processor, TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        protected internal override async Task<ProcessResult<Sequence>> TryGetTransitionSequence(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             var result = await base.TryGetTransitionSequence(processor, fromElement, toElement, transitionInfo);
             if (result.IsSuccessful)

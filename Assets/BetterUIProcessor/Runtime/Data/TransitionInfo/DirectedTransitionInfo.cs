@@ -1,28 +1,50 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using Better.UIProcessor.Runtime.Extensions;
 using Better.UIProcessor.Runtime.Interfaces;
 
 namespace Better.UIProcessor.Runtime.Data
 {
-    public class DirectedTransitionInfo<TElement> : TransitionInfo<TElement>
+    public class DirectedTransitionInfo<TElement> : TransitionInfo
         where TElement : IElement
     {
-        public Type ElementType { get; private set; }
+        public Type ElementType { get; }
 
-        public DirectedTransitionInfo(UIProcessor<TElement> processor, CancellationToken cancellationToken = default)
+        public DirectedTransitionInfo(UIProcessor processor, CancellationToken cancellationToken = default)
             : base(processor, cancellationToken)
         {
+            ElementType = typeof(TElement);
         }
 
-        public DirectedTransitionInfo<TElement> SetTargetElement<TValue>()
-            where TValue : TElement
+        public new DirectedTransitionInfo<TElement> Run()
         {
-            if (ValidateMutable(true))
+            base.Run();
+            return this;
+        }
+
+        public new async Task<ProcessResult<TElement>> Await()
+        {
+            var successful = await base.Await();
+            if (successful && Processor.TryGetOpened<TElement>(out var element))
             {
-                ElementType = typeof(TValue);
+                return new ProcessResult<TElement>(element);
             }
 
-            return this;
+            return ProcessResult<TElement>.Unsuccessful;
+        }
+    }
+
+    public class DirectedTransitionInfo<TElement, TModel> : DirectedTransitionInfo<TElement>
+        where TElement : IElement<TModel>
+        where TModel : IModel
+    {
+        public TModel Model { get; }
+
+        public DirectedTransitionInfo(UIProcessor processor, TModel model, CancellationToken cancellationToken = default)
+            : base(processor, cancellationToken)
+        {
+            Model = model;
         }
     }
 }

@@ -5,18 +5,18 @@
         public static readonly ProcessResult<T> Unsuccessful = new();
 
         public bool IsSuccessful { get; }
-        public T Data { get; }
+        public T Result { get; } // TODO: Update usage
 
         public ProcessResult()
         {
             IsSuccessful = false;
-            Data = default;
+            Result = default;
         }
 
-        public ProcessResult(T data)
+        public ProcessResult(T result)
         {
             IsSuccessful = true;
-            Data = data;
+            Result = result;
         }
     }
 }

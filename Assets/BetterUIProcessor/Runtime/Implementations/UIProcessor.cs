@@ -5,6 +5,7 @@ using Better.Commons.Runtime.Extensions;
 using Better.Commons.Runtime.Utility;
 using Better.Tweens.Runtime.Data;
 using Better.UIProcessor.Runtime.Data;
+using Better.UIProcessor.Runtime.Extensions;
 using Better.UIProcessor.Runtime.Interfaces;
 using Better.UIProcessor.Runtime.Modules;
 using Better.UIProcessor.Runtime.Sequences;
@@ -14,20 +15,19 @@ using UnityEngine;
 namespace Better.UIProcessor.Runtime
 {
     [Serializable]
-    public class UIProcessor<TElement>
-        where TElement : IElement
+    public class UIProcessor
     {
-        [SerializeField] private ModulesContainer<TElement> _modules;
+        [SerializeField] private ModulesContainer _modules;
         [SerializeField] private ImplementationOverridable<Sequence> _defaultSequence;
         [SerializeField] private RectTransform _container;
 
-        private Queue<TransitionInfo<TElement>> _transitionsQueue;
+        private Queue<TransitionInfo> _transitionsQueue;
 
         public bool Initialized { get; private set; }
         public RectTransform Container => _container;
-        public TElement OpenedElement { get; private set; }
+        public IElement OpenedElement { get; private set; }
         public bool InTransition => _transitionsQueue is { Count: < 0 };
-        private SettingsData Settings => UIProcessorSettings.Instance.Current;
+        public SettingsData Settings => UIProcessorSettings.Instance.Current;
         public Sequence DefaultSequence => _defaultSequence.Value;
 
         public UIProcessor()
@@ -53,18 +53,7 @@ namespace Better.UIProcessor.Runtime
             Initialized = true;
         }
 
-        public bool TryInitialize()
-        {
-            if (Initialized)
-            {
-                return false;
-            }
-
-            Initialize();
-            return Initialized;
-        }
-
-        public UIProcessor<TElement> SetContainer(RectTransform value)
+        public UIProcessor SetContainer(RectTransform value)
         {
             if (ValidateContainer(value))
             {
@@ -74,7 +63,7 @@ namespace Better.UIProcessor.Runtime
             return this;
         }
 
-        public UIProcessor<TElement> SetDefaultSequence(Sequence value)
+        public UIProcessor SetDefaultSequence(Sequence value)
         {
             if (value == null)
             {
@@ -86,7 +75,7 @@ namespace Better.UIProcessor.Runtime
             return this;
         }
 
-        public bool AddModule(Module<TElement> module)
+        public bool AddModule(Module module)
         {
             if (!module.Link(this))
             {
@@ -102,12 +91,12 @@ namespace Better.UIProcessor.Runtime
             return true;
         }
 
-        public bool TryGetModule(Type type, out Module<TElement> module)
+        public bool TryGetModule(Type type, out Module module)
         {
             return _modules.TryGet(type, out module);
         }
 
-        public bool RemoveModule(Module<TElement> module)
+        public bool RemoveModule(Module module)
         {
             if (!_modules.Remove(module))
             {
@@ -117,13 +106,12 @@ namespace Better.UIProcessor.Runtime
             return module.Unlink(this);
         }
 
-        internal async Task<TElement> RunTransitionAsync(TransitionInfo<TElement> transitionInfo)
+        internal async Task<bool> RunTransitionAsync(TransitionInfo transitionInfo)
         {
-            TryInitialize();
+            this.TryInitialize();
             if (!ValidateInitialized(true))
             {
-                transitionInfo.Cancel();
-                return default;
+                return false;
             }
 
             if (_transitionsQueue.Contains(transitionInfo))
@@ -140,12 +128,11 @@ namespace Better.UIProcessor.Runtime
             var transitionResult = await ProcessTransitionAsync(OpenedElement, transitionInfo);
             if (transitionResult.IsSuccessful)
             {
-                OpenedElement = transitionResult.Data;
+                OpenedElement = transitionResult.Result;
                 await _modules.OnTransitionCompleted(this, OpenedElement, transitionInfo);
             }
             else
             {
-                transitionInfo.Cancel();
                 await _modules.OnTransitionCanceled(this, transitionInfo);
             }
 
@@ -156,28 +143,28 @@ namespace Better.UIProcessor.Runtime
             }
 
             await _modules.OnDequeuedTransition(this, transitionInfo);
-            return OpenedElement;
+            return true; // TODO
         }
 
-        private async Task<ProcessResult<TElement>> ProcessTransitionAsync(TElement fromElement, TransitionInfo<TElement> transitionInfo)
+        private async Task<ProcessResult<IElement>> ProcessTransitionAsync(IElement fromElement, TransitionInfo transitionInfo)
         {
             if (transitionInfo.IsCanceled)
             {
-                return ProcessResult<TElement>.Unsuccessful;
+                return ProcessResult<IElement>.Unsuccessful;
             }
 
             var elementResult = await TryGetTransitionElement(transitionInfo);
             if (!elementResult.IsSuccessful)
             {
-                return ProcessResult<TElement>.Unsuccessful;
+                return ProcessResult<IElement>.Unsuccessful;
             }
 
-            var toElement = elementResult.Data;
+            var toElement = elementResult.Result;
             var sequenceResult = await ProcessSequenceAsync(fromElement, toElement, transitionInfo);
             if (!sequenceResult.IsSuccessful)
             {
                 await ReleaseElementAsync(toElement);
-                return ProcessResult<TElement>.Unsuccessful;
+                return ProcessResult<IElement>.Unsuccessful;
             }
 
             if (fromElement != null)
@@ -185,33 +172,33 @@ namespace Better.UIProcessor.Runtime
                 await ReleaseElementAsync(fromElement);
             }
 
-            return new ProcessResult<TElement>(toElement);
+            return new ProcessResult<IElement>(toElement);
         }
 
 
-        private async Task<ProcessResult<TElement>> ProcessSequenceAsync(TElement fromElement, TElement toElement, TransitionInfo<TElement> transitionInfo)
+        private async Task<ProcessResult<IElement>> ProcessSequenceAsync(IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             if (transitionInfo.IsCanceled)
             {
-                return ProcessResult<TElement>.Unsuccessful;
+                return ProcessResult<IElement>.Unsuccessful;
             }
 
             var sequenceResult = await _modules.TryGetTransitionSequence(this, fromElement, toElement, transitionInfo);
-            var sequence = sequenceResult.IsSuccessful ? sequenceResult.Data : DefaultSequence;
+            var sequence = sequenceResult.IsSuccessful ? sequenceResult.Result : DefaultSequence;
 
             if (transitionInfo.IsCanceled)
             {
-                return ProcessResult<TElement>.Unsuccessful;
+                return ProcessResult<IElement>.Unsuccessful;
             }
 
             await _modules.OnPreSequencePlay(this, fromElement, toElement, transitionInfo);
             await sequence.PlayAsync(fromElement, toElement);
             await _modules.OnPostSequencePlay(this, fromElement, toElement, transitionInfo);
 
-            return new ProcessResult<TElement>(toElement);
+            return new ProcessResult<IElement>(toElement);
         }
 
-        private async Task AwaitTransitionQueue(TransitionInfo<TElement> transitionInfo)
+        private async Task AwaitTransitionQueue(TransitionInfo transitionInfo)
         {
             if (_transitionsQueue.IsNullOrEmpty())
             {
@@ -223,11 +210,11 @@ namespace Better.UIProcessor.Runtime
             await TaskUtility.WaitUntil(() => _transitionsQueue.Peek().Equals(transitionInfo));
         }
 
-        private async Task<ProcessResult<TElement>> TryGetTransitionElement(TransitionInfo<TElement> transitionInfo)
+        private async Task<ProcessResult<IElement>> TryGetTransitionElement(TransitionInfo transitionInfo)
         {
             if (transitionInfo.IsCanceled)
             {
-                return ProcessResult<TElement>.Unsuccessful;
+                return ProcessResult<IElement>.Unsuccessful;
             }
 
             var elementResult = await _modules.TryGetTransitionElement(this, transitionInfo);
@@ -235,16 +222,16 @@ namespace Better.UIProcessor.Runtime
             {
                 if (elementResult.IsSuccessful)
                 {
-                    await ReleaseElementAsync(elementResult.Data);
+                    await ReleaseElementAsync(elementResult.Result);
                 }
 
-                return ProcessResult<TElement>.Unsuccessful;
+                return ProcessResult<IElement>.Unsuccessful;
             }
 
             return elementResult;
         }
 
-        private async Task ReleaseElementAsync(TElement element)
+        private async Task ReleaseElementAsync(IElement element)
         {
             var releaseResult = await _modules.TryReleaseElement(this, element);
             if (!releaseResult)
@@ -288,9 +275,5 @@ namespace Better.UIProcessor.Runtime
         {
             return ValidateContainer(Container, logException);
         }
-    }
-
-    public class UIProcessor : UIProcessor<IElement>
-    {
     }
 }

@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 namespace Better.UIProcessor.Runtime.Modules
 {
     [Serializable]
-    public class ElementPrefabsModule<TElement> : Module<TElement, DirectedTransitionInfo<TElement>>
+    public class ElementPrefabsModule<TElement> : Module<DirectedTransitionInfo<TElement>>
         where TElement : Component, IElement
     {
         [SerializeField] private Locator<TElement> _prefabs;
@@ -27,7 +27,7 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected override async Task<ProcessResult<TElement>> TryGetTransitionElement(UIProcessor<TElement> processor, DirectedTransitionInfo<TElement> transitionInfo)
+        protected override async Task<ProcessResult<IElement>> TryGetTransitionElement(UIProcessor processor, DirectedTransitionInfo<TElement> transitionInfo)
         {
             var result = await base.TryGetTransitionElement(processor, transitionInfo);
             if (result.IsSuccessful)
@@ -37,10 +37,14 @@ namespace Better.UIProcessor.Runtime.Modules
 
             if (TryCreateElement(processor.Container, transitionInfo.ElementType, out var element))
             {
-                return new ProcessResult<TElement>(element);
+                await element.InitializeAsync(transitionInfo.CancellationToken);
+                if (!transitionInfo.IsCanceled)
+                {
+                    return new ProcessResult<IElement>(element);
+                }
             }
 
-            return ProcessResult<TElement>.Unsuccessful;
+            return ProcessResult<IElement>.Unsuccessful;
         }
 
         private bool TryCreateElement(RectTransform container, Type elementType, out TElement element)

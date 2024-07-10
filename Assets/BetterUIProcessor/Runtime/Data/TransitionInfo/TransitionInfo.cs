@@ -4,17 +4,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Better.Commons.Runtime.Extensions;
 using Better.Commons.Runtime.Utility;
-using Better.UIProcessor.Runtime.Interfaces;
 using Better.UIProcessor.Runtime.Sequences;
 
 namespace Better.UIProcessor.Runtime.Data
 {
-    public abstract class TransitionInfo<TElement>
-        where TElement : IElement
+    public abstract class TransitionInfo
     {
-        private readonly UIProcessor<TElement> _processor;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly TaskCompletionSource<TElement> _completionSource;
+        private readonly TaskCompletionSource<bool> _completionSource;
 
         public Type SequenceType { get; private set; }
         public bool OverridenSequence { get; private set; }
@@ -22,15 +19,17 @@ namespace Better.UIProcessor.Runtime.Data
         public CancellationToken CancellationToken => _cancellationTokenSource.Token;
         public bool Used { get; private set; }
         public bool Mutable => !Used;
+        
+        protected UIProcessor Processor { get; }
 
-        protected TransitionInfo(UIProcessor<TElement> processor, CancellationToken cancellationToken = default)
+        protected TransitionInfo(UIProcessor processor, CancellationToken cancellationToken = default)
         {
-            _processor = processor;
+            Processor = processor;
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _completionSource = new(CancellationToken);
         }
 
-        public TransitionInfo<TElement> Run()
+        public TransitionInfo Run()
         {
             RunningAsync().Forget();
             return this;
@@ -41,16 +40,16 @@ namespace Better.UIProcessor.Runtime.Data
             if (Used) return;
             Used = true;
 
-            var result = await _processor.RunTransitionAsync(this);
+            var result = await Processor.RunTransitionAsync(this);
             _completionSource.TrySetResult(result);
         }
 
-        public Task<TElement> Await()
+        public Task<bool> Await()
         {
             return _completionSource.Task;
         }
 
-        public TransitionInfo<TElement> OverrideSequence<TSequence>()
+        public TransitionInfo OverrideSequence<TSequence>()
             where TSequence : Sequence
         {
             if (ValidateMutable(true))
@@ -62,7 +61,7 @@ namespace Better.UIProcessor.Runtime.Data
             return this;
         }
 
-        public virtual TransitionInfo<TElement> Cancel()
+        public virtual TransitionInfo Cancel()
         {
             _cancellationTokenSource.Cancel();
             return this;
@@ -89,9 +88,7 @@ namespace Better.UIProcessor.Runtime.Data
                 .AppendLine()
                 .AppendFieldLine(nameof(Used), Used)
                 .AppendFieldLine(nameof(Mutable), Mutable)
-                .AppendLine()
-                .AppendFieldLine(nameof(IsCanceled), IsCanceled)
-                .AppendFieldLine(nameof(CancellationToken), CancellationToken);
+                .AppendFieldLine(nameof(IsCanceled), IsCanceled);
         }
 
         public override string ToString()

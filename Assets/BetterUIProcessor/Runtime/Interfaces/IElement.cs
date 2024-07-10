@@ -7,4 +7,10 @@ namespace Better.UIProcessor.Runtime.Interfaces
     {
         public Task InitializeAsync(CancellationToken cancellationToken);
     }
+
+    public interface IElement<TModel> : IElement
+        where TModel : IModel
+    {
+        public void SetModel(TModel model);
+    }
 }
