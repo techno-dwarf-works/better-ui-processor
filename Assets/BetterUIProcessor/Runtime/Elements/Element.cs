@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Better.UIProcessor.Runtime
 {
     [RequireComponent(typeof(ElementView))]
-    public abstract class Element<TView, TModel> : UIMonoBehaviour, IElement<TModel>
+    public abstract class Element<TView, TModel> : UIMonoBehaviour, IElement, IModelAssignable<TModel>
         where TView : ElementView
         where TModel : ElementModel
     {
@@ -28,7 +28,7 @@ namespace Better.UIProcessor.Runtime
 
         protected abstract Task OnInitializeAsync(CancellationToken cancellationToken);
 
-        void IElement<TModel>.SetModel(TModel model)
+        void IModelAssignable<TModel>.AssignModel(TModel model)
         {
             if (model == null)
             {

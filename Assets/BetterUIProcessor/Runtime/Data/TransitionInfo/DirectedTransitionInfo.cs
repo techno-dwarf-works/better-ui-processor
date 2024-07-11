@@ -26,7 +26,7 @@ namespace Better.UIProcessor.Runtime.Data
         public new async Task<ProcessResult<TElement>> Await()
         {
             var successful = await base.Await();
-            if (successful && Processor.TryGetOpened<TElement>(out var element))
+            if (successful && Processor.TryGetOpenedElement<TElement>(out var element))
             {
                 return new ProcessResult<TElement>(element);
             }
@@ -35,16 +35,33 @@ namespace Better.UIProcessor.Runtime.Data
         }
     }
 
-    public class DirectedTransitionInfo<TElement, TModel> : DirectedTransitionInfo<TElement>
-        where TElement : IElement<TModel>
+    public class DirectedTransitionInfo<TElement, TModel> : DirectedTransitionInfo<TElement>, IModelEmitter
+        where TElement : IElement, IModelAssignable<TModel>
         where TModel : IModel
     {
+        private IModelEmitter _modelAdapterImplementation;
         public TModel Model { get; }
 
         public DirectedTransitionInfo(UIProcessor processor, TModel model, CancellationToken cancellationToken = default)
             : base(processor, cancellationToken)
         {
             Model = model;
+        }
+
+        bool IModelEmitter.TryEmitModel(object attractor)
+        {
+            if (attractor == null)
+            {
+                return false;
+            }
+
+            if (attractor is TElement assignableAttractor)
+            {
+                assignableAttractor.AssignModel(Model);
+                return true;
+            }
+
+            return false;
         }
     }
 }

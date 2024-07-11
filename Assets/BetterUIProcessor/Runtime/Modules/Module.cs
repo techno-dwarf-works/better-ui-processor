@@ -44,12 +44,12 @@ namespace Better.UIProcessor.Runtime.Modules
             return Task.FromResult(ProcessResult<Sequence>.Unsuccessful);
         }
 
-        protected internal virtual Task OnPreSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
+        protected internal virtual Task OnPreSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal virtual Task OnPostSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
+        protected internal virtual Task OnPostSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
@@ -145,32 +145,32 @@ namespace Better.UIProcessor.Runtime.Modules
             return Task.FromResult(ProcessResult<Sequence>.Unsuccessful);
         }
 
-        protected internal sealed override async Task OnPreSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
+        protected internal sealed override async Task OnPreSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
-            await base.OnPreSequencePlay(processor, fromElement, toElement, transitionInfo);
+            await base.OnPreSequencePlay(processor, sequence, fromElement, toElement, transitionInfo);
 
             if (transitionInfo is TTransitionInfo castedTransitionInfo)
             {
-                await OnPreSequencePlay(processor, fromElement, toElement, castedTransitionInfo);
+                await OnPreSequencePlay(processor, sequence, fromElement, toElement, castedTransitionInfo);
             }
         }
 
-        protected virtual Task OnPreSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TTransitionInfo transitionInfo)
+        protected virtual Task OnPreSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }
 
-        protected internal sealed override async Task OnPostSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
+        protected internal sealed override async Task OnPostSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
-            await base.OnPostSequencePlay(processor, fromElement, toElement, transitionInfo);
+            await base.OnPostSequencePlay(processor, sequence, fromElement, toElement, transitionInfo);
 
             if (transitionInfo is TTransitionInfo castedTransitionInfo)
             {
-                await OnPostSequencePlay(processor, fromElement, toElement, castedTransitionInfo);
+                await OnPostSequencePlay(processor, sequence, fromElement, toElement, castedTransitionInfo);
             }
         }
 
-        protected virtual Task OnPostSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TTransitionInfo transitionInfo)
+        protected virtual Task OnPostSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TTransitionInfo transitionInfo)
         {
             return Task.CompletedTask;
         }

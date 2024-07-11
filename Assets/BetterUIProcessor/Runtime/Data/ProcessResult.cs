@@ -5,7 +5,7 @@
         public static readonly ProcessResult<T> Unsuccessful = new();
 
         public bool IsSuccessful { get; }
-        public T Result { get; } // TODO: Update usage
+        public T Result { get; }
 
         public ProcessResult()
         {

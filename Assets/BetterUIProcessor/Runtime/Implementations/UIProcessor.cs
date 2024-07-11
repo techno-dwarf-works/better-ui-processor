@@ -17,6 +17,8 @@ namespace Better.UIProcessor.Runtime
     [Serializable]
     public class UIProcessor
     {
+        // TODO: Create Module-Elements release contract
+
         [SerializeField] private ModulesContainer _modules;
         [SerializeField] private ImplementationOverridable<Sequence> _defaultSequence;
         [SerializeField] private RectTransform _container;
@@ -27,8 +29,9 @@ namespace Better.UIProcessor.Runtime
         public RectTransform Container => _container;
         public IElement OpenedElement { get; private set; }
         public bool InTransition => _transitionsQueue is { Count: < 0 };
-        public SettingsData Settings => UIProcessorSettings.Instance.Current;
         public Sequence DefaultSequence => _defaultSequence.Value;
+
+        private SettingsData Settings => UIProcessorSettings.Instance.Current;
 
         public UIProcessor()
         {
@@ -49,7 +52,7 @@ namespace Better.UIProcessor.Runtime
 
             _transitionsQueue = new();
             _defaultSequence.SetSource(Settings.DefaultSequence);
-
+            _modules.Initialize();
             Initialized = true;
         }
 
@@ -106,6 +109,17 @@ namespace Better.UIProcessor.Runtime
             return module.Unlink(this);
         }
 
+        public async Task ReleaseElementAsync(IElement element)
+        {
+            var releaseResult = await _modules.TryReleaseElement(this, element);
+            if (!releaseResult)
+            {
+                element.RectTransform.DestroyGameObject();
+            }
+
+            await _modules.OnElementReleased(this);
+        }
+
         internal async Task<bool> RunTransitionAsync(TransitionInfo transitionInfo)
         {
             this.TryInitialize();
@@ -143,7 +157,7 @@ namespace Better.UIProcessor.Runtime
             }
 
             await _modules.OnDequeuedTransition(this, transitionInfo);
-            return true; // TODO
+            return transitionResult.IsSuccessful;
         }
 
         private async Task<ProcessResult<IElement>> ProcessTransitionAsync(IElement fromElement, TransitionInfo transitionInfo)
@@ -191,9 +205,9 @@ namespace Better.UIProcessor.Runtime
                 return ProcessResult<IElement>.Unsuccessful;
             }
 
-            await _modules.OnPreSequencePlay(this, fromElement, toElement, transitionInfo);
+            await _modules.OnPreSequencePlay(this, sequence, fromElement, toElement, transitionInfo);
             await sequence.PlayAsync(fromElement, toElement);
-            await _modules.OnPostSequencePlay(this, fromElement, toElement, transitionInfo);
+            await _modules.OnPostSequencePlay(this, sequence, fromElement, toElement, transitionInfo);
 
             return new ProcessResult<IElement>(toElement);
         }
@@ -229,17 +243,6 @@ namespace Better.UIProcessor.Runtime
             }
 
             return elementResult;
-        }
-
-        private async Task ReleaseElementAsync(IElement element)
-        {
-            var releaseResult = await _modules.TryReleaseElement(this, element);
-            if (!releaseResult)
-            {
-                element.RectTransform.DestroyGameObject();
-            }
-
-            await _modules.OnElementReleased(this);
         }
 
         private bool ValidateInitialized(bool targetState, bool logException = true)

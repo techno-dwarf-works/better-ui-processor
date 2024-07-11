@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Better.Locators.Runtime;
 using Better.UIProcessor.Runtime.Data;
@@ -19,7 +20,7 @@ namespace Better.UIProcessor.Runtime.Modules
             _prefabs = new();
         }
 
-        public ElementPrefabsModule(TElement[] prefabs) : this()
+        public ElementPrefabsModule(IEnumerable<TElement> prefabs) : this()
         {
             foreach (var prefab in prefabs)
             {

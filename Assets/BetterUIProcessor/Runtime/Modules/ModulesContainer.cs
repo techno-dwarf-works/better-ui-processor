@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Better.Commons.Runtime.DataStructures.SerializedTypes;
 using Better.Commons.Runtime.Extensions;
 using Better.Locators.Runtime;
 using Better.UIProcessor.Runtime.Data;
@@ -12,7 +14,27 @@ namespace Better.UIProcessor.Runtime.Modules
     [Serializable]
     public class ModulesContainer : Locator<Module>
     {
-        // TODO: DIC ORDER
+        private List<Module> _sortedElements;
+
+        public void Initialize()
+        {
+            // TODO: Check (serialized and code-injected) elements order after Locator`1 updated
+            _sortedElements = GetElements().ToList();
+        }
+
+        protected override void OnAdded(SerializedType key, Module module)
+        {
+            base.OnAdded(key, module);
+
+            _sortedElements.Add(module);
+        }
+
+        protected override void OnRemoved(SerializedType key, Module module)
+        {
+            base.OnRemoved(key, module);
+
+            _sortedElements.Remove(module);
+        }
 
         public Task OnEnqueuedTransition(UIProcessor processor, TransitionInfo transitionInfo)
         {
@@ -58,17 +80,17 @@ namespace Better.UIProcessor.Runtime.Modules
             return ProcessResult<Sequence>.Unsuccessful;
         }
 
-        public Task OnPreSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
+        public Task OnPreSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             return GetElements()
-                .Select(m => m.OnPreSequencePlay(processor, fromElement, toElement, transitionInfo))
+                .Select(m => m.OnPreSequencePlay(processor, sequence, fromElement, toElement, transitionInfo))
                 .WhenAll();
         }
 
-        public Task OnPostSequencePlay(UIProcessor processor, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
+        public Task OnPostSequencePlay(UIProcessor processor, Sequence sequence, IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             return GetElements()
-                .Select(m => m.OnPostSequencePlay(processor, fromElement, toElement, transitionInfo))
+                .Select(m => m.OnPostSequencePlay(processor, sequence, fromElement, toElement, transitionInfo))
                 .WhenAll();
         }
 

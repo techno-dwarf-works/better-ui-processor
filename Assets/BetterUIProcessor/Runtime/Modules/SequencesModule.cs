@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Better.Locators.Runtime;
 using Better.UIProcessor.Runtime.Data;
@@ -18,7 +19,7 @@ namespace Better.UIProcessor.Runtime.Modules
             _sequences = new();
         }
 
-        public SequencesModule(Sequence[] sequences) : this()
+        public SequencesModule(IEnumerable<Sequence> sequences) : this()
         {
             foreach (var sequence in sequences)
             {
