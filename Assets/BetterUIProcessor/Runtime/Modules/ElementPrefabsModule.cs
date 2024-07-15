@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Better.Commons.Runtime.Extensions;
 using Better.Locators.Runtime;
 using Better.UIProcessor.Runtime.Data;
 using Better.UIProcessor.Runtime.Interfaces;
@@ -10,10 +11,12 @@ using Object = UnityEngine.Object;
 namespace Better.UIProcessor.Runtime.Modules
 {
     [Serializable]
-    public class ElementPrefabsModule<TElement> : Module<DirectedTransitionInfo<TElement>>
-        where TElement : Component, IElement
+    public class ElementPrefabsModule<TElement> : Module<DirectedTransitionInfo>
+        where TElement : IElement
     {
         [SerializeField] private Locator<TElement> _prefabs;
+
+        public override int Priority => ModulePriority.DefaultWithOffset(-1);
 
         public ElementPrefabsModule()
         {
@@ -28,7 +31,23 @@ namespace Better.UIProcessor.Runtime.Modules
             }
         }
 
-        protected override async Task<ProcessResult<IElement>> TryGetTransitionElement(UIProcessor processor, DirectedTransitionInfo<TElement> transitionInfo)
+        public ElementPrefabsModule(IEnumerable<GameObject> rawPrefabs) : this()
+        {
+            foreach (var rawPrefab in rawPrefabs)
+            {
+                if (rawPrefab.TryGetComponent(out TElement prefab))
+                {
+                    _prefabs.Add(prefab);
+                }
+                else
+                {
+                    var message = $"Getting {nameof(Component)} from {nameof(rawPrefab)}({rawPrefab}), be skipped";
+                    Debug.LogWarning(message, rawPrefab);
+                }
+            }
+        }
+
+        protected override async Task<ProcessResult<IElement>> TryGetTransitionElement(UIProcessor processor, DirectedTransitionInfo transitionInfo)
         {
             var result = await base.TryGetTransitionElement(processor, transitionInfo);
             if (result.IsSuccessful)
@@ -52,12 +71,35 @@ namespace Better.UIProcessor.Runtime.Modules
         {
             if (_prefabs.TryGet(elementType, out var prefab))
             {
-                element = Object.Instantiate(prefab, container);
-                return true;
+                var rectTransform = Object.Instantiate(prefab.RectTransform, container);
+                if (rectTransform.TryGetComponent(out element))
+                {
+                    return true;
+                }
+
+                rectTransform.DestroyGameObject();
+                var message = $"{nameof(rectTransform)}({rectTransform.name}) haven`t {nameof(elementType)}({elementType}), was destroyed";
+                Debug.LogWarning(message);
             }
 
             element = default;
             return false;
         }
+
+        protected internal override async Task<bool> TryReleaseElement(UIProcessor processor, IElement element)
+        {
+            var result = await base.TryReleaseElement(processor, element);
+            if (!result)
+            {
+                element.RectTransform.DestroyGameObject();
+            }
+
+            return true;
+        }
+    }
+
+    [Serializable]
+    public class ElementPrefabsModule : ElementPrefabsModule<IElement>
+    {
     }
 }

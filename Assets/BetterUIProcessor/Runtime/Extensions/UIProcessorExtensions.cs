@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Better.Commons.Runtime.Extensions;
 using Better.UIProcessor.Runtime.Interfaces;
 using Better.UIProcessor.Runtime.Modules;
 
@@ -54,54 +55,58 @@ namespace Better.UIProcessor.Runtime.Extensions
             throw new InvalidOperationException(message);
         }
 
-        public static bool AddModule<TModule>(this UIProcessor self)
+        public static bool TryAddModule<TModule>(this UIProcessor self)
             where TModule : Module, new()
         {
             var module = new TModule();
+            return self.TryAddModule(module);
+        }
+
+        public static UIProcessor AddModule(this UIProcessor self, Module module)
+        {
+            if (!self.TryAddModule(module))
+            {
+                var message = $"{nameof(Module)}({module}) not added";
+                throw new InvalidOperationException(message);
+            }
+
+            return self;
+        }
+
+        public static UIProcessor AddModule<TModule>(this UIProcessor self)
+            where TModule : Module, new()
+        {
+            if (!self.TryAddModule<TModule>())
+            {
+                var message = $"{nameof(Module)}({typeof(TModule)}) not added";
+                throw new InvalidOperationException(message);
+            }
+
+            return self;
+        }
+
+        public static bool TryAddModule<TModule>(this UIProcessor self, IModuleProvider<TModule> provider)
+            where TModule : Module
+        {
+            var module = provider.GetModule();
+            return self.TryAddModule(module);
+        }
+
+        public static UIProcessor AddModule<TModule>(this UIProcessor self, IModuleProvider<TModule> provider)
+            where TModule : Module
+        {
+            var module = provider.GetModule();
             return self.AddModule(module);
-        }
-
-        public static bool TryGetModule<TModule>(this UIProcessor self, out TModule module)
-            where TModule : Module
-        {
-            var type = typeof(TModule);
-            if (self.TryGetModule(type, out var baseModule)
-                && baseModule is TModule castedModule)
-            {
-                module = castedModule;
-                return true;
-            }
-
-            module = null;
-            return false;
-        }
-
-        public static Module GetModule(this UIProcessor self, Type moduleType)
-        {
-            if (!self.TryGetModule(moduleType, out var module))
-            {
-                var message = $"{nameof(Module)}({moduleType}) not found";
-                throw new InvalidOperationException(message);
-            }
-
-            return module;
-        }
-
-        public static TModule GetModule<TModule>(this UIProcessor self)
-            where TModule : Module
-        {
-            if (!self.TryGetModule<TModule>(out var module))
-            {
-                var message = $"{nameof(Module)}({typeof(TModule)}) not found";
-                throw new InvalidOperationException(message);
-            }
-
-            return module;
         }
 
         public static Task ReleaseOpenedElementAsync(this UIProcessor self)
         {
             return self.ReleaseElementAsync(self.OpenedElement);
+        }
+
+        public static void ReleaseOpenedElement(this UIProcessor self)
+        {
+            self.ReleaseOpenedElementAsync().Forget();
         }
     }
 }

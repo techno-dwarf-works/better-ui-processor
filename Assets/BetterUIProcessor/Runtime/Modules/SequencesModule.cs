@@ -14,6 +14,8 @@ namespace Better.UIProcessor.Runtime.Modules
     {
         [SerializeField] private Locator<Sequence> _sequences;
 
+        public override int Priority => ModulePriority.DefaultWithOffset(-1);
+
         public SequencesModule()
         {
             _sequences = new();

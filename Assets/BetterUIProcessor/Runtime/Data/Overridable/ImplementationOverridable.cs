@@ -15,7 +15,11 @@ namespace Better.Tweens.Runtime.Data
             get => _overridenValue;
             set => _overridenValue = value;
         }
-        
+
+        public ImplementationOverridable()
+        {
+        }
+
         public ImplementationOverridable(TValue overridenValue)
         {
             _overridenValue = overridenValue;

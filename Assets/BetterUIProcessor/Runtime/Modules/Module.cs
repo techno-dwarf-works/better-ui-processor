@@ -11,6 +11,7 @@ namespace Better.UIProcessor.Runtime.Modules
     {
         public int LinksCount { get; private set; }
         public bool IsLinked => LinksCount > 0;
+        public virtual int Priority => ModulePriority.Default;
 
         protected internal virtual bool Link(UIProcessor processor)
         {

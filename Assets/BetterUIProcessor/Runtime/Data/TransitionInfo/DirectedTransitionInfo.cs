@@ -6,15 +6,23 @@ using Better.UIProcessor.Runtime.Interfaces;
 
 namespace Better.UIProcessor.Runtime.Data
 {
-    public class DirectedTransitionInfo<TElement> : TransitionInfo
-        where TElement : IElement
+    public class DirectedTransitionInfo : TransitionInfo
     {
         public Type ElementType { get; }
 
-        public DirectedTransitionInfo(UIProcessor processor, CancellationToken cancellationToken = default)
+        public DirectedTransitionInfo(UIProcessor processor, Type elementType, CancellationToken cancellationToken = default)
             : base(processor, cancellationToken)
         {
-            ElementType = typeof(TElement);
+            ElementType = elementType;
+        }
+    }
+
+    public class DirectedTransitionInfo<TElement> : DirectedTransitionInfo
+        where TElement : IElement
+    {
+        public DirectedTransitionInfo(UIProcessor processor, CancellationToken cancellationToken = default)
+            : base(processor, typeof(TElement), cancellationToken)
+        {
         }
 
         public new DirectedTransitionInfo<TElement> Run()
