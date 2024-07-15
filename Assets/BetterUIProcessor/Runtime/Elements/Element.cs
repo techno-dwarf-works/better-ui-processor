@@ -54,7 +54,6 @@ namespace Better.UIProcessor.Runtime
         async Task ISequencable.ShowAsync(CancellationToken cancellationToken)
         {
             View.Interactable = true;
-            View.Displayed = true;
 
             await View.ShowAsync(cancellationToken);
             if (!cancellationToken.IsCancellationRequested)
@@ -81,9 +80,6 @@ namespace Better.UIProcessor.Runtime
             if (!cancellationToken.IsCancellationRequested)
             {
                 await OnHideAsync(cancellationToken);
-                if (cancellationToken.IsCancellationRequested) return;
-
-                View.Displayed = false;
             }
         }
 

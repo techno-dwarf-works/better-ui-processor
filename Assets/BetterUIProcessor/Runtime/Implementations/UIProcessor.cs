@@ -204,7 +204,7 @@ namespace Better.UIProcessor.Runtime
             }
 
             await _groupModule.OnPreSequencePlay(this, sequence, fromElement, toElement, transitionInfo);
-            await sequence.PlayAsync(fromElement, toElement);
+            await sequence.PlayAsync(Container, fromElement, toElement);
             await _groupModule.OnPostSequencePlay(this, sequence, fromElement, toElement, transitionInfo);
 
             return new ProcessResult<IElement>(toElement);

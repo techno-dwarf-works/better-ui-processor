@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.tdw.better.commons": {
-      "version": "0.0.17",
+      "version": "0.0.19",
       "depth": 0,
       "source": "registry",
       "dependencies": {

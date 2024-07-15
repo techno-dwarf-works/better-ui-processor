@@ -1,4 +1,5 @@
 ﻿using System;
+using Better.Attributes.Runtime.Select;
 using Better.Commons.Runtime.Interfaces;
 using Better.Commons.Runtime.Utility;
 using Better.UIProcessor.Runtime.Sequences;
@@ -9,13 +10,14 @@ namespace Better.UIProcessor.Runtime.Settings
     [Serializable]
     public class SettingsData : ICopyable<SettingsData>
     {
-        [SerializeField] private Sequence _defaultSequence;
+        [Select]
+        [SerializeReference] private Sequence _defaultSequence;
 
         public Sequence DefaultSequence => _defaultSequence;
 
         public SettingsData()
         {
-            _defaultSequence = new DefaultSequence();
+            _defaultSequence = new GradualDefaultSequence();
         }
 
         public void SetDefaultSequence(Sequence value)
