@@ -15,7 +15,7 @@ using UnityEngine;
 namespace Better.UIProcessor.Runtime
 {
     [Serializable]
-    public class UIProcessor
+    public class UIProcessor : IModulesContainer
     {
         [SerializeField] private GroupModule _groupModule;
         [SerializeField] private ImplementationOverridable<Sequence> _defaultSequence;
@@ -37,33 +37,24 @@ namespace Better.UIProcessor.Runtime
             _defaultSequence = new ImplementationOverridable<Sequence>();
         }
 
-        public UIProcessor Initialize()
+        public UIProcessor Initialize(RectTransform container)
         {
             if (!ValidateInitialized(false))
             {
                 return this;
             }
 
-            if (!ValidateContainer())
+            if (!ValidateContainer(container))
             {
                 return this;
             }
 
+            _container = container;
             _transitionsQueue = new();
             _defaultSequence.SetSource(Settings.DefaultSequence);
-            _groupModule.ForceReOrder();
+            _groupModule.Link(this);
+
             Initialized = true;
-
-            return this;
-        }
-
-        public UIProcessor SetContainer(RectTransform value)
-        {
-            if (ValidateContainer(value))
-            {
-                _container = value;
-            }
-
             return this;
         }
 
@@ -81,23 +72,17 @@ namespace Better.UIProcessor.Runtime
 
         public bool TryAddModule(Module module)
         {
-            if (_groupModule.Contains(module) || !module.Link(this))
-            {
-                return false;
-            }
+            return _groupModule.TryAddModule(module);
+        }
 
-            _groupModule.Add(module);
-            return true;
+        public bool ContainsModule(Module module)
+        {
+            return _groupModule.ContainsModule(module);
         }
 
         public bool RemoveModule(Module module)
         {
-            if (!_groupModule.Remove(module))
-            {
-                return false;
-            }
-
-            return module.Unlink(this);
+            return _groupModule.RemoveModule(module);
         }
 
         public async Task ReleaseElementAsync(IElement element)
@@ -119,6 +104,11 @@ namespace Better.UIProcessor.Runtime
         {
             this.TryInitialize();
             if (!ValidateInitialized(true))
+            {
+                return false;
+            }
+
+            if (!ValidateContainer())
             {
                 return false;
             }
@@ -158,6 +148,11 @@ namespace Better.UIProcessor.Runtime
         private async Task<ProcessResult<IElement>> ProcessTransitionAsync(IElement fromElement, TransitionInfo transitionInfo)
         {
             if (transitionInfo.IsCanceled)
+            {
+                return ProcessResult<IElement>.Unsuccessful;
+            }
+
+            if (!ValidateContainer())
             {
                 return ProcessResult<IElement>.Unsuccessful;
             }

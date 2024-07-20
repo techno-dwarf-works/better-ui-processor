@@ -12,8 +12,8 @@ namespace Better.UIProcessor.Runtime.Sequences
         protected override Task PostPreparedProcessAsync(ISequencable from, ISequencable to, CancellationToken cancellationToken)
         {
             var tasks = new Task[2];
-            tasks[0] = TryShowAsync(from, cancellationToken);
-            tasks[1] = TryHideAsync(from, cancellationToken);
+            tasks[0] = TryHideAsync(from, cancellationToken);
+            tasks[1] = TryShowAsync(to, cancellationToken);
 
             return tasks.WhenAll();
         }

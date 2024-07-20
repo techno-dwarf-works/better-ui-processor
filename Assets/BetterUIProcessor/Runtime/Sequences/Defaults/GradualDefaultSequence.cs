@@ -11,7 +11,7 @@ namespace Better.UIProcessor.Runtime.Sequences
         protected override async Task PostPreparedProcessAsync(ISequencable from, ISequencable to, CancellationToken cancellationToken)
         {
             await TryHideAsync(from, cancellationToken);
-            await TryShowAsync(from, cancellationToken);
+            await TryShowAsync(to, cancellationToken);
         }
 
         public override Sequence Clone()

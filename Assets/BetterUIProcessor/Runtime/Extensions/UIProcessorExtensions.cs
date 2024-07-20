@@ -1,13 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Better.Commons.Runtime.Extensions;
 using Better.UIProcessor.Runtime.Interfaces;
-using Better.UIProcessor.Runtime.Modules;
+using UnityEngine;
 
 namespace Better.UIProcessor.Runtime.Extensions
 {
     public static class UIProcessorExtensions
     {
+        public static UIProcessor Initialize(this UIProcessor self)
+        {
+            return self.Initialize(self.Container);
+        }
+
+        public static bool TryInitialize(this UIProcessor self, RectTransform container)
+        {
+            if (self.Initialized)
+            {
+                return false;
+            }
+
+            self.Initialize(container);
+            return self.Initialized;
+        }
+
         public static bool TryInitialize(this UIProcessor self)
         {
             if (self.Initialized)
@@ -55,48 +73,26 @@ namespace Better.UIProcessor.Runtime.Extensions
             throw new InvalidOperationException(message);
         }
 
-        public static bool TryAddModule<TModule>(this UIProcessor self)
-            where TModule : Module, new()
+        public static UIProcessor ReleaseElement(this UIProcessor self, IElement element)
         {
-            var module = new TModule();
-            return self.TryAddModule(module);
-        }
-
-        public static UIProcessor AddModule(this UIProcessor self, Module module)
-        {
-            if (!self.TryAddModule(module))
-            {
-                var message = $"{nameof(Module)}({module}) not added";
-                throw new InvalidOperationException(message);
-            }
-
+            self.ReleaseElementAsync(element).Forget();
             return self;
         }
 
-        public static UIProcessor AddModule<TModule>(this UIProcessor self)
-            where TModule : Module, new()
+        public static Task ReleaseElementsAsync(this UIProcessor self, IEnumerable<IElement> elements)
         {
-            if (!self.TryAddModule<TModule>())
+            if (elements == null)
             {
-                var message = $"{nameof(Module)}({typeof(TModule)}) not added";
-                throw new InvalidOperationException(message);
+                return Task.CompletedTask;
             }
 
+            return elements.Select(self.ReleaseElementAsync).WhenAll();
+        }
+
+        public static UIProcessor ReleaseElements(this UIProcessor self, IEnumerable<IElement> elements)
+        {
+            self.ReleaseElementsAsync(elements).Forget();
             return self;
-        }
-
-        public static bool TryAddModule<TModule>(this UIProcessor self, IModuleProvider<TModule> provider)
-            where TModule : Module
-        {
-            var module = provider.GetModule();
-            return self.TryAddModule(module);
-        }
-
-        public static UIProcessor AddModule<TModule>(this UIProcessor self, IModuleProvider<TModule> provider)
-            where TModule : Module
-        {
-            var module = provider.GetModule();
-            return self.AddModule(module);
         }
 
         public static Task ReleaseOpenedElementAsync(this UIProcessor self)

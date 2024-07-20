@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.tdw.better.commons": "0.0.19",
+    "com.tdw.better.commons": "0.0.20",
     "com.tdw.better.locators": "0.1.12",
     "com.tdw.better.projectsettings": "0.1.2",
     "com.unity.collab-proxy": "2.0.1",

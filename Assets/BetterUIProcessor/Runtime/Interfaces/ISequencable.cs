@@ -7,6 +7,7 @@ namespace Better.UIProcessor.Runtime.Interfaces
     public interface ISequencable
     {
         public RectTransform RectTransform { get; }
+        public bool Displayed { get; set; }
 
         public Task PrepareShowAsync(CancellationToken cancellationToken);
         public Task ShowAsync(CancellationToken cancellationToken);

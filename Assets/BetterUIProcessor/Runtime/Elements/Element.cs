@@ -17,6 +17,12 @@ namespace Better.UIProcessor.Runtime
 
         protected TModel Model { get; private set; }
         protected TView View => _view;
+        
+        bool ISequencable.Displayed
+        {
+            get => View.Displayed;
+            set => View.Displayed = value;
+        }
 
         Task IElement.InitializeAsync(CancellationToken cancellationToken)
         {

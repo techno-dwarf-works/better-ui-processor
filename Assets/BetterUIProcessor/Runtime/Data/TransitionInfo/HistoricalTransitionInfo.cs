@@ -16,11 +16,11 @@ namespace Better.UIProcessor.Runtime.Data
             UseSafeDepth = false;
         }
 
-        public HistoricalTransitionInfo MakeSafeDepth()
+        public HistoricalTransitionInfo SetSafeDepth(bool value = true)
         {
             if (ValidateMutable(true))
             {
-                UseSafeDepth = true;
+                UseSafeDepth = value;
             }
 
             return this;

@@ -42,11 +42,7 @@ namespace Better.UIProcessor.Runtime.Sequences
                 return false;
             }
 
-            if (sequencable.RectTransform.TryGetComponent<CanvasGroup>(out var canvasGroup))
-            {
-                canvasGroup.alpha = 1f;
-            }
-
+            sequencable.Displayed = true;
             await sequencable.ShowAsync(cancellationToken);
             return true;
         }
@@ -59,10 +55,7 @@ namespace Better.UIProcessor.Runtime.Sequences
             }
 
             await sequencable.HideAsync(cancellationToken);
-            if (sequencable.RectTransform.TryGetComponent<CanvasGroup>(out var canvasGroup))
-            {
-                canvasGroup.alpha = 0f;
-            }
+            sequencable.Displayed = false;
 
             return true;
         }
