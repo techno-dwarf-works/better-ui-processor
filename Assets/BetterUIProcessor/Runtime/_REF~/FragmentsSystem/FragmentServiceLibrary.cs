@@ -5,7 +5,6 @@ using Better.Attributes.Runtime.Manipulation;
 using Better.Extensions.Runtime;
 using Better.Singletons.Runtime;
 using UnityEngine;
-
 namespace Better.UIComposite.Runtime
 {
     [CreateAssetMenu(menuName = "Settings/Fragments/Library")]

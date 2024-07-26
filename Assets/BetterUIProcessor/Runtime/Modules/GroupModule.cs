@@ -179,6 +179,12 @@ namespace Better.UIProcessor.Runtime.Modules
                 .WhenAll();
         }
 
+        protected internal override Task OnElementPreReleased(UIProcessor processor, IElement element)
+        {
+            return _subModules.Select(m => m.OnElementPreReleased(processor, element))
+                .WhenAll();
+        }
+
         protected internal override async Task<bool> TryReleaseElement(UIProcessor processor, IElement element)
         {
             foreach (var module in _subModules)

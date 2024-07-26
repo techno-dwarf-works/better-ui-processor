@@ -58,10 +58,13 @@ namespace Better.UIProcessor.Runtime.Modules
             if (TryCreateElement(processor.Container, transitionInfo.ElementType, out var element))
             {
                 await element.InitializeAsync(transitionInfo.CancellationToken);
-                if (!transitionInfo.IsCanceled)
+
+                if (transitionInfo.IsCanceled && await TryReleaseElement(processor, element))
                 {
-                    return new ProcessResult<IElement>(element);
+                    return ProcessResult<IElement>.Unsuccessful;
                 }
+
+                return new ProcessResult<IElement>(element);
             }
 
             return ProcessResult<IElement>.Unsuccessful;

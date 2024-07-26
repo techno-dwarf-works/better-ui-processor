@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Better.Commons.Runtime.Extensions;
 using Better.Commons.Runtime.Utility;
@@ -9,7 +10,6 @@ using Better.UIProcessor.Runtime.Extensions;
 using Better.UIProcessor.Runtime.Interfaces;
 using Better.UIProcessor.Runtime.Modules;
 using Better.UIProcessor.Runtime.Sequences;
-using Better.UIProcessor.Runtime.Settings;
 using UnityEngine;
 
 namespace Better.UIProcessor.Runtime
@@ -29,33 +29,71 @@ namespace Better.UIProcessor.Runtime
         public bool InTransition => _transitionsQueue is { Count: < 0 };
         public Sequence DefaultSequence => _defaultSequence.Value;
 
-        private SettingsData Settings => UIProcessorSettings.Instance.Current;
-
         public UIProcessor()
         {
             _groupModule = new();
             _defaultSequence = new ImplementationOverridable<Sequence>();
         }
 
-        public UIProcessor Initialize(RectTransform container)
+        public Task InitializeAsync(RectTransform container)
         {
             if (!ValidateInitialized(false))
             {
-                return this;
+                return Task.CompletedTask;
             }
 
             if (!ValidateContainer(container))
             {
-                return this;
+                return Task.CompletedTask;
             }
 
+            var settings = UIProcessorSettings.Instance.Current;
+
+            _transitionsQueue ??= new();
+            _defaultSequence.SetSource(settings.DefaultSequence);
             _container = container;
-            _transitionsQueue = new();
-            _defaultSequence.SetSource(Settings.DefaultSequence);
             _groupModule.Link(this);
 
             Initialized = true;
-            return this;
+            return Task.CompletedTask;
+        }
+
+        public async Task InitializeAsync(RectTransform container, IElement prewarmedElement)
+        {
+            await InitializeAsync(container);
+            await PrewarmOpenedElementAsync(prewarmedElement);
+        }
+
+        private async Task PrewarmOpenedElementAsync(IElement prewarmedElement)
+        {
+            if (!ValidateInitialized(true))
+            {
+                return;
+            }
+
+            if (InTransition)
+            {
+                var message = $"Cannot use {prewarmedElement} when in transition";
+                DebugUtility.LogException<InvalidOperationException>(message);
+                return;
+            }
+
+            var transitionInfo = new PrewarmTransitionInfo(this);
+            _transitionsQueue.Enqueue(transitionInfo);
+
+            await prewarmedElement.InitializeAsync(CancellationToken.None);
+            await prewarmedElement.PrepareShowAsync(CancellationToken.None);
+            await prewarmedElement.ShowAsync(CancellationToken.None);
+            prewarmedElement.Displayed = true;
+            
+            OpenedElement = prewarmedElement;
+
+            if (!_transitionsQueue.TryDequeue(out var dequeuedTransitionInfo)
+                || dequeuedTransitionInfo != transitionInfo)
+            {
+                var message = $"Unexpected dequeue operation for {nameof(transitionInfo)}({transitionInfo})";
+                DebugUtility.LogException<InvalidOperationException>(message);
+            }
         }
 
         public UIProcessor SetDefaultSequence(Sequence value)
@@ -87,6 +125,7 @@ namespace Better.UIProcessor.Runtime
 
         public async Task ReleaseElementAsync(IElement element)
         {
+            await _groupModule.OnElementPreReleased(this, element);
             var releaseResult = await _groupModule.TryReleaseElement(this, element);
             if (!releaseResult)
             {

@@ -10,9 +10,27 @@ namespace Better.UIProcessor.Runtime.Extensions
 {
     public static class UIProcessorExtensions
     {
+        public static UIProcessor Initialize(this UIProcessor self, RectTransform container)
+        {
+            self.InitializeAsync(container).Forget();
+            return self;
+        }
+
         public static UIProcessor Initialize(this UIProcessor self)
         {
             return self.Initialize(self.Container);
+        }
+
+        public static UIProcessor Initialize(this UIProcessor self, RectTransform container, IElement prewarmedElement)
+        {
+            self.InitializeAsync(container, prewarmedElement).Forget();
+            return self;
+        }
+
+        public static UIProcessor Initialize(this UIProcessor self, IElement prewarmedElement)
+        {
+            self.InitializeAsync(self.Container, prewarmedElement).Forget();
+            return self;
         }
 
         public static bool TryInitialize(this UIProcessor self, RectTransform container)
@@ -23,6 +41,28 @@ namespace Better.UIProcessor.Runtime.Extensions
             }
 
             self.Initialize(container);
+            return self.Initialized;
+        }
+
+        public static bool TryInitialize(this UIProcessor self, RectTransform container, IElement prewarmedElement)
+        {
+            if (self.Initialized)
+            {
+                return false;
+            }
+
+            self.Initialize(container, prewarmedElement);
+            return self.Initialized;
+        }
+
+        public static bool TryInitialize(this UIProcessor self, IElement prewarmedElement)
+        {
+            if (self.Initialized)
+            {
+                return false;
+            }
+
+            self.Initialize(prewarmedElement);
             return self.Initialized;
         }
 

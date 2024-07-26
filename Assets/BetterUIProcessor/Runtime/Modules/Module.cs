@@ -65,6 +65,11 @@ namespace Better.UIProcessor.Runtime.Modules
             return Task.CompletedTask;
         }
 
+        protected internal virtual Task OnElementPreReleased(UIProcessor processor, IElement element)
+        {
+            return Task.CompletedTask;
+        }
+
         protected internal virtual Task<bool> TryReleaseElement(UIProcessor processor, IElement element)
         {
             return Task.FromResult(false);
