@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Better.Attributes.Runtime.Select;
 using UnityEngine;
 
@@ -18,9 +18,11 @@ namespace Better.Tweens.Runtime.Data
 
         public ImplementationOverridable()
         {
+
         }
 
         public ImplementationOverridable(TValue overridenValue)
+
         {
             _overridenValue = overridenValue;
         }
