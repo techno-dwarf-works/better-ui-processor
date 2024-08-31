@@ -9,10 +9,8 @@ namespace Better.UIProcessor.Runtime.Sequences
     [Serializable]
     public class ParallelSequence : SimpleSequence
     {
-        public override async Task PlayAsync(RectTransform container, ISequencable from, ISequencable to)
+        protected override async Task ProcessAsync(RectTransform container, ISequencable from, ISequencable to)
         {
-            await base.PlayAsync(container, from, to);
-
             var tasks = new Task[2];
             tasks[0] = TryHideAsync(from);
             tasks[1] = TryShowAsync(to);

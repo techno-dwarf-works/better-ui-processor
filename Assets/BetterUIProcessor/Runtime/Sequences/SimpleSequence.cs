@@ -11,29 +11,56 @@ namespace Better.UIProcessor.Runtime.Sequences
     [Serializable]
     public abstract class SimpleSequence : Sequence
     {
-        public override async Task PlayAsync(RectTransform container, ISequencable from, ISequencable to)
+        public sealed override async Task PlayAsync(RectTransform container, ISequencable from, ISequencable to)
         {
-            var preparedTasks = new List<Task>(2);
+            await PreProcessAsync(container, from, to);
+            await ProcessAsync(container, from, to);
+            await PostProcessAsync(container, from, to);
+        }
+
+        protected virtual async Task PreProcessAsync(RectTransform container, ISequencable from, ISequencable to)
+        {
+            var tasks = new List<Task>(2);
 
             if (from != null)
             {
-                var prepareHideTask = from.PrepareHideAsync(CancellationToken.None);
-                preparedTasks.Add(prepareHideTask);
+                var preHideTask = from.PreHideAsync(CancellationToken.None);
+                tasks.Add(preHideTask);
             }
 
             if (to != null)
             {
-                var prepareShowTask = to.PrepareShowAsync(CancellationToken.None);
-                preparedTasks.Add(prepareShowTask);
+                var preShowTask = to.PreShowAsync(CancellationToken.None);
+                tasks.Add(preShowTask);
             }
 
-            await preparedTasks.WhenAll();
+            await tasks.WhenAll();
         }
 
-        protected virtual async Task ShowAsync(ISequencable sequencable)
+        protected abstract Task ProcessAsync(RectTransform container, ISequencable from, ISequencable to);
+
+        protected virtual async Task PostProcessAsync(RectTransform container, ISequencable from, ISequencable to)
         {
-            sequencable.Displayed = true;
-            await sequencable.ShowAsync(CancellationToken.None);
+            var tasks = new List<Task>(2);
+
+            if (from != null)
+            {
+                var postHideTask = from.PostHideAsync(CancellationToken.None);
+                tasks.Add(postHideTask);
+            }
+
+            if (to != null)
+            {
+                var postShowTask = to.PreShowAsync(CancellationToken.None);
+                tasks.Add(postShowTask);
+            }
+
+            await tasks.WhenAll();
+        }
+
+        protected virtual Task ShowAsync(ISequencable sequencable)
+        {
+            return sequencable.ShowAsync(CancellationToken.None);
         }
 
         protected Task TryShowAsync(ISequencable sequencable)
@@ -46,10 +73,9 @@ namespace Better.UIProcessor.Runtime.Sequences
             return ShowAsync(sequencable);
         }
 
-        protected virtual async Task HideAsync(ISequencable sequencable)
+        protected virtual Task HideAsync(ISequencable sequencable)
         {
-            await sequencable.HideAsync(CancellationToken.None);
-            sequencable.Displayed = false;
+            return sequencable.HideAsync(CancellationToken.None);
         }
 
         protected Task TryHideAsync(ISequencable sequencable)

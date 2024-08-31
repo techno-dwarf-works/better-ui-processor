@@ -8,9 +8,8 @@ namespace Better.UIProcessor.Runtime.Sequences
     [Serializable]
     public class GradualSequence : SimpleSequence
     {
-        public override async Task PlayAsync(RectTransform container, ISequencable from, ISequencable to)
+        protected override async Task ProcessAsync(RectTransform container, ISequencable from, ISequencable to)
         {
-            await base.PlayAsync(container, from, to);
             await TryHideAsync(from);
             await TryShowAsync(to);
         }

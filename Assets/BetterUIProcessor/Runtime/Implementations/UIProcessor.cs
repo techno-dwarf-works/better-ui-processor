@@ -82,9 +82,9 @@ namespace Better.UIProcessor.Runtime
             _transitionsQueue.Enqueue(transitionInfo);
 
             await prewarmedElement.InitializeAsync(CancellationToken.None);
-            await prewarmedElement.PrepareShowAsync(CancellationToken.None);
+            await prewarmedElement.PreShowAsync(CancellationToken.None);
             await prewarmedElement.ShowAsync(CancellationToken.None);
-            prewarmedElement.Displayed = true;
+            await prewarmedElement.PostShowAsync(CancellationToken.None);
             
             OpenedElement = prewarmedElement;
 

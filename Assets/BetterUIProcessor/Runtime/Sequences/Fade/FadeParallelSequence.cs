@@ -26,16 +26,18 @@ namespace Better.UIProcessor.Runtime.Sequences
         protected override Task ShowAsync(ISequencable sequencable)
         {
             var tasks = new Task[2];
-            tasks[1] = base.ShowAsync(sequencable);
-            tasks[0] = Fade(sequencable, 1f);
+            tasks[0] = base.ShowAsync(sequencable);
+            tasks[1] = Fade(sequencable, 1f);
+
             return tasks.WhenAll();
         }
 
         protected override Task HideAsync(ISequencable sequencable)
         {
             var tasks = new Task[2];
-            tasks[1] = base.HideAsync(sequencable);
-            tasks[0] = Fade(sequencable, 0f);
+            tasks[0] = base.HideAsync(sequencable);
+            tasks[1] = Fade(sequencable, 0f);
+
             return tasks.WhenAll();
         }
 
