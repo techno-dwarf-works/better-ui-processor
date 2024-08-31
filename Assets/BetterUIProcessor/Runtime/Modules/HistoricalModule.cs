@@ -96,7 +96,11 @@ namespace Better.UIProcessor.Runtime.Modules
                 if (popResult.IsSuccessful)
                 {
                     _unreleasedBuffer.Add(popResult.Result);
-                    return new ProcessResult<IElement>(popResult.Result.Element);
+
+                    var element = popResult.Result.Element;
+                    element.RectTransform.SetParent(processor.Container);
+                    element.RectTransform.SetAsLastSibling();
+                    return new ProcessResult<IElement>(element);
                 }
             }
 
