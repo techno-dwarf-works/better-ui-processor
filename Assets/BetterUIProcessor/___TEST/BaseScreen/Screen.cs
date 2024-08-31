@@ -39,9 +39,9 @@ namespace TEST
             Debug.Log($"{name}: Rebuild");
         }
 
-        protected override Task OnPrepareShowAsync(CancellationToken cancellationToken)
+        protected override Task OnPreShowAsync(CancellationToken cancellationToken)
         {
-            Debug.Log($"{name}: OnPrepare Show");
+            Debug.Log($"{name}: OnPreShow Show");
             return Task.CompletedTask;
         }
 
@@ -51,15 +51,27 @@ namespace TEST
             return Task.CompletedTask;
         }
 
-        protected override Task OnPrepareHideAsync(CancellationToken cancellationToken)
+        protected override Task OnPostShowAsync(CancellationToken cancellationToken)
         {
-            Debug.Log($"{name}: OnPrepare Hide");
+            Debug.Log($"{name}: OnPostShow Hide");
+            return Task.CompletedTask;   
+        }
+
+        protected override Task OnPreHideAsync(CancellationToken cancellationToken)
+        {
+            Debug.Log($"{name}: OnPreHide Hide");
             return Task.CompletedTask;
         }
 
         protected override Task OnHideAsync(CancellationToken cancellationToken)
         {
             Debug.Log($"{name}: OnHide");
+            return Task.CompletedTask;
+        }
+
+        protected override Task OnPostHideAsync(CancellationToken cancellationToken)
+        {
+            Debug.Log($"{name}: OnPostHide");
             return Task.CompletedTask;
         }
 
