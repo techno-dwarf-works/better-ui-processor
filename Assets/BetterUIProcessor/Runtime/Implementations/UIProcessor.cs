@@ -221,7 +221,6 @@ namespace Better.UIProcessor.Runtime
             return new ProcessResult<IElement>(toElement);
         }
 
-
         private async Task<ProcessResult<IElement>> ProcessSequenceAsync(IElement fromElement, IElement toElement, TransitionInfo transitionInfo)
         {
             if (transitionInfo.IsCanceled)

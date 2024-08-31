@@ -9,9 +9,9 @@ using UnityEngine;
 namespace Better.UIProcessor.Runtime.Sequences
 {
     [Serializable]
-    public abstract class DefaultSequence : Sequence
+    public abstract class SimpleSequence : Sequence
     {
-        public sealed override async Task PlayAsync(RectTransform container, ISequencable from, ISequencable to)
+        public override async Task PlayAsync(RectTransform container, ISequencable from, ISequencable to)
         {
             var preparedTasks = new List<Task>(2);
 
@@ -23,41 +23,43 @@ namespace Better.UIProcessor.Runtime.Sequences
 
             if (to != null)
             {
-                to.RectTransform.SetAsLastSibling();
-
                 var prepareShowTask = to.PrepareShowAsync(CancellationToken.None);
                 preparedTasks.Add(prepareShowTask);
             }
 
             await preparedTasks.WhenAll();
-            await PostPreparedProcessAsync(from, to, CancellationToken.None);
         }
 
-        protected abstract Task PostPreparedProcessAsync(ISequencable from, ISequencable to, CancellationToken cancellationToken);
-
-        protected async Task<bool> TryShowAsync(ISequencable sequencable, CancellationToken cancellationToken)
+        protected virtual async Task ShowAsync(ISequencable sequencable)
         {
-            if (sequencable == null)
-            {
-                return false;
-            }
-
             sequencable.Displayed = true;
-            await sequencable.ShowAsync(cancellationToken);
-            return true;
+            await sequencable.ShowAsync(CancellationToken.None);
         }
 
-        protected async Task<bool> TryHideAsync(ISequencable sequencable, CancellationToken cancellationToken)
+        protected Task TryShowAsync(ISequencable sequencable)
         {
             if (sequencable == null)
             {
-                return false;
+                return Task.CompletedTask;
             }
 
-            await sequencable.HideAsync(cancellationToken);
-            sequencable.Displayed = false;
+            return ShowAsync(sequencable);
+        }
 
-            return true;
+        protected virtual async Task HideAsync(ISequencable sequencable)
+        {
+            await sequencable.HideAsync(CancellationToken.None);
+            sequencable.Displayed = false;
+        }
+
+        protected Task TryHideAsync(ISequencable sequencable)
+        {
+            if (sequencable == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            return HideAsync(sequencable);
         }
 
         public override Sequence GetInverseSequence()

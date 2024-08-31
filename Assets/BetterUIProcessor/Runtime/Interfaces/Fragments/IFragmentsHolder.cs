@@ -7,8 +7,6 @@ namespace Better.UIProcessor.Runtime.Interfaces
 {
     public interface IFragmentsHolder
     {
-        // TODO: Impl FragmentLocator
-
         public RectTransform RectTransform { get; }
         public FragmentInstruction Instruction { get; }
         public virtual int Priority => FragmentPriority.Default;
