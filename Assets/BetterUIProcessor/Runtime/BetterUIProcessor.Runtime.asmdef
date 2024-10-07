@@ -21,7 +21,7 @@
     "versionDefines": [
         {
             "name": "com.tdw.better.tweens",
-            "expression": "0.0.3",
+            "expression": "0.0.5",
             "define": "BETTER_TWEENS"
         }
     ],
