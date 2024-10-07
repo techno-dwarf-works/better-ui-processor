@@ -8,7 +8,8 @@
         "GUID:1862b35041b066d42ab4d3caf773657b",
         "GUID:d103b3c6d6cb0564d8d6543e9d797878",
         "GUID:af7fffdf1d83bc842b0f6e3a01efda16",
-        "GUID:35101f455c979e94c9a0a4793484b7fd"
+        "GUID:35101f455c979e94c9a0a4793484b7fd",
+        "GUID:d93d03cfdadede7468b389b1aac7ee67"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -17,6 +18,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.tdw.better.tweens",
+            "expression": "0.0.5",
+            "define": "BETTER_TWEENS"
+        }
+    ],
     "noEngineReferences": false
 }

@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a01d693a53314914816aa83a58d4cd95, type: 3}
+  m_Name: TweensSettings
+  m_EditorClassIdentifier: 
+  _persistent:
+    _globalTimeScale: 1
+    _dependUnityTimeScale: 1
+    _dependGlobalTimeScale: 1
+    _sleepingDuration:
+      _infinity: 0
+      _value: 15
+    _logLevel: 1
+    _safeMode: 1
+    _ease:
+      rid: 3546233024040402946
+    _completionAction:
+      rid: 3546233024040402947
+    _rewoundAction:
+      rid: 3546233024040402948
+  _runtime:
+    _globalTimeScale: 1
+    _dependUnityTimeScale: 1
+    _dependGlobalTimeScale: 1
+    _sleepingDuration:
+      _infinity: 0
+      _value: 15
+    _logLevel: 1
+    _safeMode: 1
+    _ease:
+      rid: 3546233024040402949
+    _completionAction:
+      rid: 3546233024040402947
+    _rewoundAction:
+      rid: 3546233024040402948
+  references:
+    version: 2
+    RefIds:
+    - rid: 3546233024040402946
+      type: {class: LinearEase, ns: Better.Tweens.Runtime, asm: Better.Tweens.Runtime}
+    - rid: 3546233024040402947
+      type: {class: StopAction, ns: Better.Tweens.Runtime.Actions, asm: Better.Tweens.Runtime}
+    - rid: 3546233024040402948
+      type: {class: PauseAction, ns: Better.Tweens.Runtime.Actions, asm: Better.Tweens.Runtime}
+    - rid: 3546233024040402949
+      type: {class: LinearEase, ns: Better.Tweens.Runtime, asm: Better.Tweens.Runtime}

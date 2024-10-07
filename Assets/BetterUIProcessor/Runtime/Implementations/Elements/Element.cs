@@ -18,12 +18,6 @@ namespace Better.UIProcessor.Runtime
         protected TModel Model { get; private set; }
         protected TView View => _view;
         
-        bool ISequencable.Displayed
-        {
-            get => View.Displayed;
-            set => View.Displayed = value;
-        }
-
         Task IElement.InitializeAsync(CancellationToken cancellationToken)
         {
             View.Interactable = false;
@@ -50,12 +44,12 @@ namespace Better.UIProcessor.Runtime
 
         #region ISequencable
 
-        Task ISequencable.PrepareShowAsync(CancellationToken cancellationToken)
+        Task ISequencable.PreShowAsync(CancellationToken cancellationToken)
         {
-            return OnPrepareShowAsync(cancellationToken);
+            return OnPreShowAsync(cancellationToken);
         }
 
-        protected abstract Task OnPrepareShowAsync(CancellationToken cancellationToken);
+        protected abstract Task OnPreShowAsync(CancellationToken cancellationToken);
 
         async Task ISequencable.ShowAsync(CancellationToken cancellationToken)
         {
@@ -69,19 +63,26 @@ namespace Better.UIProcessor.Runtime
         }
 
         protected abstract Task OnShowAsync(CancellationToken cancellationToken);
-
-        Task ISequencable.PrepareHideAsync(CancellationToken cancellationToken)
+        
+        Task ISequencable.PostShowAsync(CancellationToken cancellationToken)
         {
-            View.Interactable = false;
-            return OnPrepareHideAsync(cancellationToken);
+            View.Displayed = true;
+            return OnPostShowAsync(cancellationToken);
         }
 
-        protected abstract Task OnPrepareHideAsync(CancellationToken cancellationToken);
+        protected abstract Task OnPostShowAsync(CancellationToken cancellationToken);
+
+        
+        Task ISequencable.PreHideAsync(CancellationToken cancellationToken)
+        {
+            View.Interactable = false;
+            return OnPreHideAsync(cancellationToken);
+        }
+
+        protected abstract Task OnPreHideAsync(CancellationToken cancellationToken);
 
         async Task ISequencable.HideAsync(CancellationToken cancellationToken)
         {
-            View.Interactable = false;
-
             await View.HideAsync(cancellationToken);
             if (!cancellationToken.IsCancellationRequested)
             {
@@ -90,6 +91,14 @@ namespace Better.UIProcessor.Runtime
         }
 
         protected abstract Task OnHideAsync(CancellationToken cancellationToken);
+
+        Task ISequencable.PostHideAsync(CancellationToken cancellationToken)
+        {
+            View.Displayed = false;
+            return OnPostHideAsync(cancellationToken);
+        }
+
+        protected abstract Task OnPostHideAsync(CancellationToken cancellationToken);
 
         #endregion
     }

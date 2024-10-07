@@ -1,4 +1,4 @@
-﻿using Better.Internal.Core.Runtime;
+using Better.Internal.Core.Runtime;
 using Better.ProjectSettings.Runtime;
 using Better.Singletons.Runtime.Attributes;
 using Better.UIProcessor.Runtime.Settings;
