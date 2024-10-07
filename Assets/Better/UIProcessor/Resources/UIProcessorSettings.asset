@@ -9,6 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a01d693a53314914816aa83a58d4cd95, type: 3}
+  m_Script: {fileID: 11500000, guid: 1bc03ca0760b57e4dadace6f45053735, type: 3}
   m_Name: UIProcessorSettings
   m_EditorClassIdentifier: 
+  _persistent:
+    _defaultSequence:
+      rid: 3546233024040402944
+  _runtime:
+    _defaultSequence:
+      rid: 3546233024040402945
+  references:
+    version: 2
+    RefIds:
+    - rid: 3546233024040402944
+      type: {class: GradualSequence, ns: Better.UIProcessor.Runtime.Sequences, asm: BetterUIProcessor.Runtime}
+    - rid: 3546233024040402945
+      type: {class: GradualSequence, ns: Better.UIProcessor.Runtime.Sequences, asm: BetterUIProcessor.Runtime}
