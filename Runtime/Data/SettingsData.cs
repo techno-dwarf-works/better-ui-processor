@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Better.Attributes.Runtime.Select;
 using Better.Commons.Runtime.Interfaces;
 using Better.Commons.Runtime.Utility;
@@ -17,7 +17,7 @@ namespace Better.UIProcessor.Runtime.Settings
 
         public SettingsData()
         {
-            _defaultSequence = new GradualDefaultSequence();
+            _defaultSequence = new GradualSequence();
         }
 
         public void SetDefaultSequence(Sequence value)
