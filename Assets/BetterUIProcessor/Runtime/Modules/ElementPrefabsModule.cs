@@ -104,5 +104,16 @@ namespace Better.UIProcessor.Runtime.Modules
     [Serializable]
     public class ElementPrefabsModule : ElementPrefabsModule<IElement>
     {
+        public ElementPrefabsModule()
+        {
+        }
+
+        public ElementPrefabsModule(IEnumerable<IElement> prefabs) : base(prefabs)
+        {
+        }
+
+        public ElementPrefabsModule(IEnumerable<GameObject> rawPrefabs) : base(rawPrefabs)
+        {
+        }
     }
 }
