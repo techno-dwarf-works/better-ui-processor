@@ -6,7 +6,6 @@ using Better.Commons.Runtime.Extensions;
 using Better.Commons.Runtime.Utility;
 using Better.Tweens.Runtime.Data;
 using Better.UIProcessor.Runtime.Data;
-using Better.UIProcessor.Runtime.Extensions;
 using Better.UIProcessor.Runtime.Interfaces;
 using Better.UIProcessor.Runtime.Modules;
 using Better.UIProcessor.Runtime.Sequences;
@@ -85,7 +84,7 @@ namespace Better.UIProcessor.Runtime
             await prewarmedElement.PreShowAsync(CancellationToken.None);
             await prewarmedElement.ShowAsync(CancellationToken.None);
             await prewarmedElement.PostShowAsync(CancellationToken.None);
-            
+
             OpenedElement = prewarmedElement;
 
             if (!_transitionsQueue.TryDequeue(out var dequeuedTransitionInfo)
@@ -125,6 +124,11 @@ namespace Better.UIProcessor.Runtime
 
         public async Task ReleaseElementAsync(IElement element)
         {
+            if (!ValidateInitialized(true))
+            {
+                return;
+            }
+
             await _groupModule.OnElementPreReleased(this, element);
             var releaseResult = await _groupModule.TryReleaseElement(this, element);
             if (!releaseResult)
@@ -141,7 +145,6 @@ namespace Better.UIProcessor.Runtime
 
         internal async Task<bool> RunTransitionAsync(TransitionInfo transitionInfo)
         {
-            this.TryInitialize();
             if (!ValidateInitialized(true))
             {
                 return false;
