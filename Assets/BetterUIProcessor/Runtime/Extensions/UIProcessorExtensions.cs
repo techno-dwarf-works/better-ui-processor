@@ -10,6 +10,11 @@ namespace Better.UIProcessor.Runtime.Extensions
 {
     public static class UIProcessorExtensions
     {
+        public static Task InitializeAsync(this UIProcessor self)
+        {
+            return self.InitializeAsync(self.Container);
+        }
+
         public static UIProcessor Initialize(this UIProcessor self, RectTransform container)
         {
             self.InitializeAsync(container).Forget();
@@ -18,9 +23,15 @@ namespace Better.UIProcessor.Runtime.Extensions
 
         public static UIProcessor Initialize(this UIProcessor self)
         {
-            return self.Initialize(self.Container);
+            self.InitializeAsync().Forget();
+            return self;
         }
 
+        public static Task InitializeAsync(this UIProcessor self, IElement prewarmedElement)
+        {
+            return self.InitializeAsync(self.Container, prewarmedElement);
+        }
+        
         public static UIProcessor Initialize(this UIProcessor self, RectTransform container, IElement prewarmedElement)
         {
             self.InitializeAsync(container, prewarmedElement).Forget();
@@ -29,52 +40,8 @@ namespace Better.UIProcessor.Runtime.Extensions
 
         public static UIProcessor Initialize(this UIProcessor self, IElement prewarmedElement)
         {
-            self.InitializeAsync(self.Container, prewarmedElement).Forget();
+            self.InitializeAsync(prewarmedElement).Forget();
             return self;
-        }
-
-        public static bool TryInitialize(this UIProcessor self, RectTransform container)
-        {
-            if (self.Initialized)
-            {
-                return false;
-            }
-
-            self.Initialize(container);
-            return self.Initialized;
-        }
-
-        public static bool TryInitialize(this UIProcessor self, RectTransform container, IElement prewarmedElement)
-        {
-            if (self.Initialized)
-            {
-                return false;
-            }
-
-            self.Initialize(container, prewarmedElement);
-            return self.Initialized;
-        }
-
-        public static bool TryInitialize(this UIProcessor self, IElement prewarmedElement)
-        {
-            if (self.Initialized)
-            {
-                return false;
-            }
-
-            self.Initialize(prewarmedElement);
-            return self.Initialized;
-        }
-
-        public static bool TryInitialize(this UIProcessor self)
-        {
-            if (self.Initialized)
-            {
-                return false;
-            }
-
-            self.Initialize();
-            return self.Initialized;
         }
 
         public static bool HasOpenedElement(this UIProcessor self)
