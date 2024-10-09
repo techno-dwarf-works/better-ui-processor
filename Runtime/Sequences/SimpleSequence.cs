@@ -51,7 +51,7 @@ namespace Better.UIProcessor.Runtime.Sequences
 
             if (to != null)
             {
-                var postShowTask = to.PreShowAsync(CancellationToken.None);
+                var postShowTask = to.PostShowAsync(CancellationToken.None);
                 tasks.Add(postShowTask);
             }
 
