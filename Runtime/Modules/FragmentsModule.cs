@@ -217,6 +217,8 @@ namespace Better.UIProcessor.Runtime.Modules
         private Task SnapFragmentAsync(IFragment fragment, RectTransform container)
         {
             fragment.RectTransform.SetParent(container, false);
+            fragment.RectTransform.SetAsLastSibling();
+
             return fragment.OnSnappedAsync(CancellationToken.None);
         }
 
