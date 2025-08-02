@@ -98,7 +98,7 @@ namespace Better.UIProcessor.Runtime.Modules
         {
             await base.OnPostSequencePlay(processor, sequence, fromElement, toElement, transitionInfo);
 
-            if (_locator.TryGet(toElement, out var toMeta))
+            if (toElement != null&& _locator.TryGet(toElement, out var toMeta))
             {
                 await SnapFragmentsAsync(toMeta.FragmentSet, toMeta.Holder.RectTransform);
             }
